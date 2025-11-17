@@ -1,2 +1,2 @@
 # test-webvr
-ก่อนใส่ใน alfa
+ก่อนใส่ใน version alpha
