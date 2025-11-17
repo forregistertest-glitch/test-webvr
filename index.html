@@ -1040,6 +1040,26 @@
         </div>
     </div>
     
+    <div id="lightbox-album-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-75 hidden">
+        <button id="lightbox-album-close" class="lightbox-button absolute top-4 right-4 z-[120]">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+
+        <button id="lightbox-album-prev" class="lightbox-button absolute left-4 sm:left-10 z-[120]">
+            <i data-lucide="chevron-left" class="w-8 h-8"></i>
+        </button>
+        <button id="lightbox-album-next" class="lightbox-button absolute right-4 sm:right-10 z-[120]">
+            <i data-lucide="chevron-right" class="w-8 h-8"></i>
+        </button>
+
+        <div class="relative w-auto h-auto max-w-[90vw] max-h-[90vh]">
+            <img id="lightbox-album-image" src="https://placehold.co/800x600/000000/ffffff?text=Loading..." alt="ขยายภาพ" class="max-w-[90vw] max-h-[90vh] rounded-lg shadow-lg">
+            <div id="lightbox-album-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black bg-opacity-60 text-white text-xs px-3 py-1 rounded-full">
+                1 / 3
+            </div>
+        </div>
+    </div>
+        
     <script>
         lucide.createIcons();
     </script> 
@@ -1055,6 +1075,13 @@
     <script src="app-init.js"></script>
     
     <script src="app.js"></script> 
+
+    <script src="extdoc-data.js"></script>
+    <script src="extdoc-logic.js"></script>
+    <script src="extdoc-init.js"></script>
+    <script src="extdoc-addnew-init.js"></script>
+    </body>
+</html>
 
 </body>
 </html>

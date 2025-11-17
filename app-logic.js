@@ -104,7 +104,14 @@ async function loadModuleContent(contentFile) {
         if (contentFile === 'assessment_content.html') {
             initializeAssessmentScripts(); 
         } else if (contentFile === 'ext_doc_content.html') {
-            // ไฟล์ใหม่ของเรา (ext_doc_content.html) ไม่มี JS ที่ต้องรัน
+            // (ใหม่) เรียกใช้ตัวเริ่มต้นของโมดูล Ext Doc
+            initializeExtDocScripts();
+        /* VVVV เพิ่มโค้ด 3 บรรทัดนี้เข้าไป VVVV */
+        } else if (contentFile === 'extdoc_page_addnew.html') {
+            // (ใหม่) เรียกใช้ตัวเริ่มต้นของหน้า Add New Ext Doc
+            initializeExtDocAddNewPage();
+        /* ^^^^ สิ้นสุดโค้ดที่เพิ่ม ^^^^ */
+         
         }
         // ... (เพิ่มเงื่อนไขสำหรับโมดูลอื่นๆ ในอนาคต) ...
 
