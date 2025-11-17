@@ -1,10 +1,11 @@
-// This is app-init.js
+// This is app-init.js (BETA 3.1 - Bug Fix v4 - COMPLETE FILE)
 // It contains all the logic formerly inside app.js's DOMContentLoaded listener
 
 function initializeApp() {
     
     // +++ START: EMR Tab Loading Logic (NEW) +++
     initializeTabSwitching();
+    initializeVitalSignsSaveLogic(); // (เรียกฟังก์ชัน Save ใหม่)
     
     // Load the initial content (Assessment)
     const activeTab = document.querySelector('.emr-tab.tab-active');
@@ -59,7 +60,8 @@ function initializeApp() {
     if (cancelButtonTF) cancelButtonTF.addEventListener('click', hidePopupTF);
     if (modalTF) { modalTF.addEventListener('click', (event) => { if (event.target === modalTF) hidePopupTF(); }); }
 
-    // --- Modal: Vital Signs ---
+    // --- Modal: Vital Signs (อัปเกรด BETA 3.1) ---
+    // (*** ลบโค้ดที่ซ้ำซ้อนออกแล้ว ***)
     const openVitalsButton = document.getElementById('open-vitals-popup');
     const vitalsModal = document.getElementById('vitals-popup-modal');
     const closeVitalsX = document.getElementById('close-vitals-popup-x');
@@ -72,8 +74,48 @@ function initializeApp() {
         if (typeof lucide !== 'undefined') {
             lucide.createIcons(); 
         }
-        // Load history data on open
-        renderVsHistoryTable(vsHistoryData);
+        
+        // --- (FIX 1/2) แปลงข้อมูล activityLogData ให้ตารางเดิมอ่านได้ ---
+        // (activityLogData มาจาก app-data.js)
+        const filteredVitals = activityLogData.filter(entry => 
+            entry.activity_type === "Vital Signs" && entry.status === "Done"
+        );
+        
+        // (แปลง Data Model ใหม่ กลับไปเป็น Data Model เก่า ที่ renderVsHistoryTable ต้องการ)
+        const legacyVsHistoryData = filteredVitals.map(entry => {
+            return {
+                id: entry.entry_id,
+                datetimeSort: new Date(entry.effective_time).toISOString(), // (ต้องแปลงกลับ)
+                datetime: entry.effective_time.split(',')[0], // (เอาแค่วันที่)
+                bp: entry.parameters.BP,
+                pulse: entry.parameters.Pulse,
+                hr: entry.parameters.HR,
+                rr: entry.parameters.RR,
+                temp: entry.parameters.Temp,
+                fbs: entry.parameters.FBS,
+                crt: entry.parameters.CRT,
+                mucous: entry.parameters.MM,
+                pulse_quality: entry.parameters.Pulse_Quality,
+                lung: entry.parameters.Lung,
+                heart: entry.parameters.Heart,
+                loc: entry.parameters.LOC,
+                pain: entry.parameters.Pain,
+                cyanosis: (entry.parameters.Cyanosis === 'Yes'),
+                seizure: (entry.parameters.Seizure === 'Yes'),
+                arrest: (entry.parameters.Arrest === 'Yes'),
+                note: entry.parameters.Note
+            };
+        });
+        
+        // (เรียกฟังก์ชัน Render เดิม แต่ใช้ข้อมูลใหม่ที่แปลงแล้ว)
+        // (*** ย้าย Logic การ Sort และ Render มาไว้ "ข้างใน" นี้ ***)
+        sortVsData(legacyVsHistoryData, vsCurrentSort.column, vsCurrentSort.direction);
+        renderVsHistoryTable(legacyVsHistoryData);
+        vsHistoryHeaders.forEach(header => {
+            if (header.dataset.sort === vsCurrentSort.column) {
+                 updateVsSortUI(header);
+            }
+        });
     };
     const hideVitalsPopup = () => { if (vitalsModal) vitalsModal.classList.add('hidden'); };
 
@@ -86,18 +128,49 @@ function initializeApp() {
         }); 
     }
     
-    // --- Modal: Eye Exam (NEW) ---
+    // --- Modal: Eye Exam (อัปเกรด BETA 3.1) ---
     const openEyeButton = document.getElementById('open-eye-popup');
     const eyeModal = document.getElementById('eye-exam-modal');
     const closeEyeX = document.getElementById('close-eye-popup-x');
     const closeEyeCancel = document.getElementById('close-eye-popup-cancel');
     const eyeTabLinks = eyeModal.querySelectorAll('.eye-tab-link');
     const eyeTabContents = eyeModal.querySelectorAll('.eye-tab-content');
-    const openDrawingBtn = document.getElementById('open-drawing-tool'); // <-- Find the single button
+    const openDrawingBtn = document.getElementById('open-drawing-tool');
 
     const showEyePopup = () => { 
         if (eyeModal) eyeModal.classList.remove('hidden'); 
-        renderEyeExamHistoryTable(eyeExamHistoryData); // โหลดข้อมูล History เมื่อเปิด
+        
+        // --- (FIX 2/2) แปลงข้อมูล activityLogData ให้ตาราง Eye Exam อ่านได้ ---
+        const filteredEye = activityLogData.filter(entry => 
+            entry.activity_type === "Eye Exam" && entry.status === "Done"
+        );
+
+        const legacyEyeHistoryData = filteredEye.map(entry => {
+            // (ฟังก์ชัน renderEyeExamHistoryTable อยู่ใน app-logic.js)
+            return {
+                datetimeSort: new Date(entry.effective_time).toISOString(),
+                datetime: entry.effective_time.split(',')[0],
+                dvm: entry.dvm || '', // (ใช้ค่าว่างแทน N/A)
+                plr_od: entry.parameters.plr_od,
+                plr_os: entry.parameters.plr_os,
+                palpebral_od: entry.parameters.palpebral_od,
+                palpebral_os: entry.parameters.palpebral_os,
+                dazzle_od: entry.parameters.dazzle_od,
+                dazzle_os: entry.parameters.dazzle_os,
+                menace_od: entry.parameters.menace_od,
+                menace_os: entry.parameters.menace_os,
+                stt_od: entry.parameters.stt_od,
+                stt_os: entry.parameters.stt_os,
+                iop_od: entry.parameters.iop_od,
+                iop_os: entry.parameters.iop_os,
+                fluorescein_od: entry.parameters.fluorescein_od,
+                fluorescein_os: entry.parameters.fluorescein_os,
+                imageUrl: (entry.parameters.Note) ? 'eyeexam.png' : null // (สมมติว่ามีรูปถ้ามี Note)
+            };
+        });
+
+        renderEyeExamHistoryTable(legacyEyeHistoryData); // (เรียกฟังก์ชัน Render เดิม)
+        
         if (typeof lucide !== 'undefined') {
             lucide.createIcons(); 
         }
@@ -178,9 +251,7 @@ function initializeApp() {
         numpadModal.addEventListener('click', (e) => {
             const target = e.target.closest('.numpad-btn'); // หปุ่มที่ถูกคลิก
             if (!target) {
-                 // ถ้าคลิกนอกปุ่ม (แต่ยังอยู่ใน modal) ไม่ต้องทำอะไร
                  if (e.target === numpadModal) {
-                     // คลิกพื้นหลัง modal (ซ่อน)
                      numpadModal.classList.add('hidden');
                  }
                  return;
@@ -252,7 +323,6 @@ function initializeApp() {
     });
 
     // --- Problem List Modal (Tagging Section) ---
-    // (ย้าย Logic เข้ามาใน DOMContentLoaded เพราะ Element อยู่ใน index.html)
     const categoryList = document.getElementById('category-list');
     const categoryItems = categoryList ? categoryList.querySelectorAll('li[data-category-id]') : [];
     const resultTableBody = document.getElementById('result-table-body');
@@ -303,17 +373,12 @@ function initializeApp() {
                 renderResultTable(categoryId);
             });
         });
-        // Render 'common' category by default when modal is opened (or on page load)
         renderResultTable('common');
     }
     
     
-    // **** START: Vital Signs Internal Script (Merged) ****
-    // This logic is for elements *inside* the modal, so it can be initialized once.
+    // **** START: Vital Signs Internal Script (Merged - อัปเกรด BETA 3.1) ****
     
-    // --- History Table Logic (Vital Signs) (MODIFIED) ---
-    // (*** 'vsHistoryData' ถูกย้ายไป app-data.js แล้ว ***)
-
     const vsTableBody = document.getElementById('historyTableBody');
     const vsNoHistoryMessage = document.getElementById('noHistoryMessage');
     const vsHistoryHeaders = document.querySelectorAll('#historyTable .history-sort-header'); 
@@ -384,8 +449,8 @@ function initializeApp() {
         }
     }
 
-    function sortVsData(column, direction) {
-        vsHistoryData.sort((a, b) => {
+    function sortVsData(data, column, direction) {
+        data.sort((a, b) => {
             let valA = a[column];
             let valB = b[column];
 
@@ -395,7 +460,6 @@ function initializeApp() {
                 return direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
             }
             if (['pulse', 'hr', 'rr', 'temp', 'pain', 'fbs'].includes(column)) {
-                // Handle nulls for numeric sort
                 valA = valA === null ? (direction === 'asc' ? Infinity : -Infinity) : valA;
                 valB = valB === null ? (direction === 'asc' ? Infinity : -Infinity) : valB;
                 return direction === 'asc' ? valA - valB : valB - valA;
@@ -403,7 +467,6 @@ function initializeApp() {
             if (['cyanosis', 'seizure', 'arrest'].includes(column)) {
                  return direction === 'asc' ? (valA === valB ? 0 : valA ? 1 : -1) : (valA === valB ? 0 : valA ? -1 : 1);
             }
-            // Handle nulls for string sort
             valA = valA === null ? '' : String(valA).toLowerCase();
             valB = valB === null ? '' : String(valB).toLowerCase();
 
@@ -438,7 +501,8 @@ function initializeApp() {
             lucide.createIcons(); 
         }
     }
-
+    
+    // (*** (แก้ไข) ผูก Event Listener ของ Header ที่นี่ ***)
     if (vsHistoryHeaders.length > 0) {
         vsHistoryHeaders.forEach(header => {
             header.addEventListener('click', () => {
@@ -452,33 +516,47 @@ function initializeApp() {
                     vsCurrentSort.direction = sortColumn === 'datetime' ? 'desc' : 'asc';
                 }
                 
-                sortVsData(sortColumn === 'datetime' ? 'datetimeSort' : sortColumn, vsCurrentSort.direction);
-                renderVsHistoryTable(vsHistoryData);
+                // (เรียก showVitalsPopup() ใหม่เพื่อกรอง, แปลง, และเรียงลำดับข้อมูลใหม่)
+                showVitalsPopup(); 
                 updateVsSortUI(header);
             });
         });
-
-        // Initial render
-        sortVsData(vsCurrentSort.column, vsCurrentSort.direction); 
-        renderVsHistoryTable(vsHistoryData);
-        vsHistoryHeaders.forEach(header => {
-            if (header.dataset.sort === 'datetime') { 
-                 updateVsSortUI(header);
-            }
-        });
     }
 
+
+    // --- (FIX 3/3) แก้ไขปุ่ม Chart ---
     const bpChartBtn = document.getElementById('bp-chart-btn');
     const vitalsChartBtn = document.getElementById('vitals-chart-btn');
 
+    // (Helper Function สำหรับแปลงข้อมูลให้ Chart)
+    function getLegacyVsDataForChart() {
+        const filteredVitals = activityLogData.filter(entry => 
+            entry.activity_type === "Vital Signs" && entry.status === "Done"
+        );
+        return filteredVitals.map(entry => {
+            return {
+                datetimeSort: new Date(entry.effective_time).toISOString(),
+                datetime: entry.effective_time, // (Chart ต้องการ Full Datetime)
+                bp: entry.parameters.BP,
+                pulse: entry.parameters.Pulse,
+                hr: entry.parameters.HR,
+                rr: entry.parameters.RR,
+                temp: entry.parameters.Temp,
+                fbs: entry.parameters.FBS,
+            };
+        });
+    }
+
     if (bpChartBtn) {
         bpChartBtn.addEventListener('click', () => {
-            openBpChart(vsHistoryData);
+            const chartData = getLegacyVsDataForChart();
+            openBpChart(chartData); // (ส่งข้อมูลที่แปลงแล้วไปให้ Chart)
         });
     }
     if (vitalsChartBtn) {
         vitalsChartBtn.addEventListener('click', () => {
-            openVitalsChart(vsHistoryData);
+            const chartData = getLegacyVsDataForChart();
+            openVitalsChart(chartData); // (ส่งข้อมูลที่แปลงแล้วไปให้ Chart)
         });
     }
     
@@ -489,4 +567,137 @@ function initializeApp() {
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
+
+// =================================================================
+// START: (ใหม่) BETA 3.0 - Logic สำหรับ Vital Signs Pop-up
+// =================================================================
+
+// (ฟังก์ชัน Helper ใหม่สำหรับ Format วันที่ตามที่คุณต้องการ)
+function formatKAHISDateTime(dateObj) {
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    const d = String(dateObj.getDate()).padStart(2, '0');
+    const m = monthNames[dateObj.getMonth()]; 
+    const y = dateObj.getFullYear();
+    const h = String(dateObj.getHours()).padStart(2, '0');
+    const min = String(dateObj.getMinutes()).padStart(2, '0');
+    const sec = String(dateObj.getSeconds()).padStart(2, '0');
+    
+    // 31 Dec 2025, 23:58:00
+    return `${d} ${m} ${y}, ${h}:${min}:${sec}`; 
+}
+
+// (ฟังก์ชันนี้จะถูกเรียกโดย initializeApp() ที่อยู่ข้างบน)
+function initializeVitalSignsSaveLogic() {
+    
+    const saveButton = document.getElementById('btn-save-vitals');
+    const vitalsModal = document.getElementById('vitals-popup-modal');
+    
+    if (!saveButton) {
+        console.error("Vital Signs Save Button not found!");
+        return;
+    }
+
+    saveButton.addEventListener('click', () => {
+        
+        // --- 1. รวบรวมข้อมูลจากฟอร์ม ---
+        const effectiveDate = document.getElementById('vs-effective-date').value;
+        const effectiveTime = document.getElementById('vs-effective-time').value;
+        const dvm = document.getElementById('vs-dvm').value;
+        const department = document.getElementById('vs-department').value;
+        
+        // (*** (แก้ไข) ตรวจสอบค่าว่างของ Date/Time ก่อน ***)
+        if (!effectiveDate || !effectiveTime) {
+            alert("Please select Effective Date and Time.");
+            return;
+        }
+
+        const effectiveTimestamp = formatKAHISDateTime(new Date(`${effectiveDate}T${effectiveTime}`));
+        const recordTimestamp = formatKAHISDateTime(new Date()); 
+        
+        const parameters = {
+            Temp: document.getElementById('vs-temp').value || null,
+            RR: document.getElementById('vs-rr').value || null,
+            HR: document.getElementById('vs-hr').value || null,
+            BP: document.getElementById('vs-bp').value || null,
+            Pulse: document.getElementById('vs-pulse').value || null,
+            CRT: document.getElementById('vs-crt').value || null,
+            FBS: document.getElementById('vs-fbs').value || null,
+            MM: document.getElementById('mucous-dropdown').value || null,
+            Lung: document.getElementById('lung-dropdown').value || null,
+            Heart: document.getElementById('heart-dropdown').value || null,
+            Pulse_Quality: document.getElementById('pulse-quality-dropdown').value || null,
+            LOC: document.getElementById('gcs-dropdown').value || null,
+            Pain: document.getElementById('pain-score-dropdown').value || null,
+            Cyanosis: document.getElementById('check-cyanosis').checked ? 'Yes' : 'No',
+            Seizure: document.getElementById('check-seizure').checked ? 'Yes' : 'No',
+            Arrest: document.getElementById('check-arrest').checked ? 'Yes' : 'No',
+            Note: document.getElementById('system-review-notes').value || ""
+        };
+
+        // --- 2. สร้าง Entry ใหม่ (ตาม Workflow A) ---
+        const timestamp = Date.now();
+        const newEntry = {
+            entry_id: `E-${timestamp}`,
+            order_no: `ORD-${timestamp}`, 
+            acc_no: `VS-${timestamp}`,   
+            activity_type: "Vital Signs",
+            status: "Done", 
+            
+            effective_time: effectiveTimestamp, 
+            target_time: null,
+            order_note: "",
+
+            parameters: parameters,
+
+            recorded_by: "User (Login)", 
+            dvm: dvm || null, 
+            department: department, 
+            
+            last_updated_by: "User (Login)",
+            last_updated_on: recordTimestamp, 
+            disable_remark: ""
+        };
+
+        // --- 3. บันทึกข้อมูลลงฐานข้อมูลกลาง ---
+        activityLogData.push(newEntry);
+
+        alert("Vital Signs Saved!\n(Check activityLogData in console)");
+        console.log("New Entry Added:", newEntry);
+        console.log("Current activityLogData:", activityLogData);
+
+        // (*** (ใหม่) เคลียร์ฟอร์มและปิด Modal ***)
+        
+        // (เคลียร์ค่า input)
+        document.getElementById('vs-temp').value = '';
+        document.getElementById('vs-rr').value = '';
+        document.getElementById('vs-hr').value = '';
+        document.getElementById('vs-bp').value = '';
+        document.getElementById('vs-pulse').value = '';
+        document.getElementById('vs-crt').value = '';
+        document.getElementById('vs-fbs').value = '';
+        document.getElementById('mucous-dropdown').value = '';
+        document.getElementById('lung-dropdown').value = '';
+        document.getElementById('heart-dropdown').value = '';
+        document.getElementById('pulse-quality-dropdown').value = '';
+        document.getElementById('gcs-dropdown').value = '';
+        document.getElementById('pain-score-dropdown').value = '';
+        document.getElementById('check-cyanosis').checked = false;
+        document.getElementById('check-seizure').checked = false;
+        document.getElementById('check-arrest').checked = false;
+        document.getElementById('system-review-notes').value = '';
+        document.getElementById('vs-effective-date').value = '';
+        document.getElementById('vs-effective-time').value = '';
+        document.getElementById('vs-dvm').value = '';
+        // (ไม่ต้องเคลียร์ Department ที่เป็น Default)
+
+        // (ปิด Modal)
+        vitalsModal.classList.add('hidden');
+    });
+}
+
+// =================================================================
+// END: (ใหม่) BETA 3.0 - Logic
+// =================================================================
 }

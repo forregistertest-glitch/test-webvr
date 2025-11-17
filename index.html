@@ -593,7 +593,7 @@
                     
                     <div id="content-new-vitals" class="vitals-tab-content hidden space-y-4 p-6 md:p-8">
                         
-                        <section class="p-6 rounded-lg border border-[var(--color-border-base)] bg-[var(--color-bg-content)] shadow-sm">
+                     <section class="p-6 rounded-lg border border-[var(--color-border-base)] bg-[var(--color-bg-content)] shadow-sm">
                             <div class="flex justify-between items-center mb-5">
                                 <h2 class="text-xl font-semibold flex items-center text-[var(--color-text-base)]">
                                     <i data-lucide="heart-pulse" class="w-6 h-6 mr-3 text-[var(--color-primary-500)]"></i>
@@ -750,35 +750,64 @@
                                 <textarea id="system-review-notes" rows="4" class="form-input" placeholder="พิมพ์ข้อความสั้นๆ"></textarea>
                             </div>
                         </section>
-
                         <section class="p-6 rounded-lg border border-[var(--color-border-base)] bg-[var(--color-bg-content)] shadow-sm">
                             <h2 class="text-xl font-semibold mb-5 flex items-center text-[var(--color-text-base)]">
                                 <i data-lucide="calendar-clock" class="w-6 h-6 mr-3 text-[var(--color-primary-500)]"></i>
-                                Record Date/Time
+                                Effective Date/Time
                             </h2>
+                            <p class="text-xs text-[var(--color-text-muted)] mb-3 -mt-3">
+                                (เวลาของข้อมูลที่ต้องการให้แสดงผล)
+                            </p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="vs-date" class="form-label">Date</label>
-                                    <input type="date" id="vs-date" class="form-input form-input-datetime" placeholder="Current date/time" required>
+                                    <label for="vs-effective-date" class="form-label">Date</label>
+                                    <input type="date" id="vs-effective-date" class="form-input form-input-datetime" placeholder="Current date" required>
                                 </div>
                                 <div>
-                                    <label for="vs-time" class="form-label">Time</label>
-                                    <input type="time" id="vs-time" class="form-input form-input-datetime" placeholder="Current date/time" required>
+                                    <label for="vs-effective-time" class="form-label">Time</label>
+                                    <input type="time" id="vs-effective-time" class="form-input form-input-datetime" placeholder="Current time" required>
                                 </div>
                             </div>
                         </section>
-                    </div>
+                        <section class="p-6 rounded-lg border border-[var(--color-border-base)] bg-[var(--color-bg-content)] shadow-sm">
+                            <h2 class="text-xl font-semibold mb-5 flex items-center text-[var(--color-text-base)]">
+                                <i data-lucide="users" class="w-6 h-6 mr-3 text-[var(--color-primary-500)]"></i>
+                                Record Meta (ข้อมูลการบันทึก)
+                            </h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="vs-dvm" class="form-label">DVM (Optional)</label>
+                                    <select id="vs-dvm" class="form-input form-select">
+                                        <option value="" selected>(None)</option>
+                                        <option value="Dr. AAA">Dr. AAA</option>
+                                        <option value="Dr. BBB">Dr. BBB</option>
+                                        <option value="Dr. CCC">Dr. CCC</option>
+                                        <option value="Dr. Eye">Dr. Eye</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="vs-department" class="form-label">Department (Default from Login)</label>
+                                    <select id="vs-department" class="form-input form-select">
+                                        <option value="101 อายุรกรรม" selected>101 อายุรกรรม (Default)</option>
+                                        <option value="201 ฉุกเฉิน">201 ฉุกเฉิน</option>
+                                        <option value="301 คลินิกพิเศษ">301 คลินิกพิเศษ</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        </div>
                 </main>
-            </div>
+            </div>    
 
             <footer class="flex-shrink-0 flex justify-between items-center p-4 border-t border-[var(--color-border-base)] bg-[var(--color-bg-secondary)]">
                 <button id="close-vitals-popup-cancel" class="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 dark:bg-[var(--color-border-base)] dark:hover:bg-[var(--color-border-base)] text-gray-700 dark:text-[var(--color-text-base)] text-sm font-medium">
                     Close
                 </button>
-                <button class="flex items-center space-x-1.5 px-6 py-2 rounded-md bg-[var(--color-green-600)] text-white hover:bg-[var(--color-green-700)] dark:bg-[var(--color-green-600)] dark:hover:bg-[var(--color-green-700)] transition-colors text-sm font-medium">
-                    <i data-lucide="save" class="w-4 h-4"></i>
-                    <span>Save Vital Signs</span>
-                </button>
+                <button id="btn-save-vitals" class="flex items-center space-x-1.5 px-6 py-2 rounded-md bg-[var(--color-green-600)] text-white hover:bg-[var(--color-green-700)] dark:bg-[var(--color-green-600)] dark:hover:bg-[var(--color-green-700)] transition-colors text-sm font-medium">
+    <i data-lucide="save" class="w-4 h-4"></i>
+    <span>Save Vital Signs</span>
+</button>
             </footer>
         </div>
     </div>
@@ -1080,6 +1109,7 @@
     <script src="extdoc-logic.js"></script>
     <script src="extdoc-init.js"></script>
     <script src="extdoc-addnew-init.js"></script>
+    <script src="order-pe-init.js"></script>
     </body>
 </html>
 

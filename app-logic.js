@@ -111,7 +111,11 @@ async function loadModuleContent(contentFile) {
             // (ใหม่) เรียกใช้ตัวเริ่มต้นของหน้า Add New Ext Doc
             initializeExtDocAddNewPage();
         /* ^^^^ สิ้นสุดโค้ดที่เพิ่ม ^^^^ */
-         
+        /* VVVV เพิ่มโค้ด 3 บรรทัดนี้เข้าไป VVVV */
+        } else if (contentFile === 'order_pe_content.html') {
+            // (ใหม่) เรียกใช้ตัวเริ่มต้นของหน้า Order PE
+            initializeOrderPEScripts();
+        /* ^^^^ สิ้นสุดโค้ดที่เพิ่ม ^^^^ */
         }
         // ... (เพิ่มเงื่อนไขสำหรับโมดูลอื่นๆ ในอนาคต) ...
 
