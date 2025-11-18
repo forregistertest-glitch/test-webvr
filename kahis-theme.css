@@ -327,3 +327,78 @@ START: BETA 3.1 (BETA 4.0) Floating Action Button Styles
 END: BETA 3.1 Floating Action Button Styles
 ===============================================
 */
+/* ===============================================
+START: BETA 3.2 (BETA 4.1) Copy Sparkle Effect
+===============================================
+*/
+
+/* นี่คือตัว "Copied!" ที่ลอยออกมา
+  (อิงจากดีไซน์ของ lucide.dev)
+*/
+.copied-sparkle-toast {
+    position: absolute;
+    /* (ตำแหน่งจะถูกกำหนดโดย JS) */
+    
+    background-color: var(--color-text-base);
+    color: var(--color-bg-content);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem; /* 12px */
+    font-weight: 600;
+    
+    /* (ป้องกันไม่ให้ผู้ใช้คลิกโดน) */
+    pointer-events: none; 
+    
+    /* (กำหนด z-index สูงๆ) */
+    z-index: 150; 
+    
+    /* (เรียก Animation) */
+    animation: sparkle-pop 1s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* (นี่คือ "ประกายวิ้งๆ" ที่อยู่ข้างใต้) */
+.copied-sparkle-toast::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* (สีของประกายไฟ - ใช้สีเขียวของโปรเจค) */
+    background-image: linear-gradient(45deg, 
+        var(--color-green-600), 
+        var(--color-primary-500), 
+        var(--color-orange-500)
+    );
+    
+    border-radius: 9999px;
+    transform: scale(1.2);
+    filter: blur(8px);
+    opacity: 0.7;
+    z-index: -1;
+    
+    /* (เรียก Animation ประกายไฟ) */
+    animation: sparkle-pop 1s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* (Keyframes สำหรับการ "เด้ง" และ "จางหาย") */
+@keyframes sparkle-pop {
+    0% {
+        transform: translate(0, 0) scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(0, -25px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(0, -40px) scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* ===============================================
+END: BETA 3.2 Copy Sparkle Effect
+===============================================
+*/

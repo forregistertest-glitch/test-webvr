@@ -10,33 +10,39 @@
             1. Target (เป้าหมายคำสั่ง)
         </h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label for="pe-target-date" class="form-label">Target Date (วันที่ต้องการให้ทำ)</label>
-                <input type="date" id="pe-target-date" class="form-input form-input-datetime" placeholder="Select date" required>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="md:col-span-1 space-y-4">
+                <div>
+                    <label for="pe-target-date" class="form-label">Target Date (วันที่ต้องการให้ทำ)</label>
+                    <input type="date" id="pe-target-date" class="form-input form-input-datetime" placeholder="Select date" required>
+                </div>
+                <div>
+                    <label for="pe-target-time" class="form-label">Target Time (เวลาที่ต้องการให้ทำ)</label>
+                    <input type="time" id="pe-target-time" class="form-input form-input-datetime" placeholder="Select time" required>
+                </div>
             </div>
-            <div>
-                <label for="pe-target-time" class="form-label">Target Time (เวลาที่ต้องการให้ทำ)</label>
-                <input type="time" id="pe-target-time" class="form-input form-input-datetime" placeholder="Select time" required>
-            </div>
-            <div>
-                <label for="pe-target-dvm" class="form-label">Target DVM (Optional)</label>
-                <select id="pe-target-dvm" class="form-input form-select">
-                    <option value="" selected>(None)</option>
-                    <option value="Dr. AAA">Dr. AAA</option>
-                    <option value="Dr. BBB">Dr. BBB</option>
-                    <option value="Dr. CCC">Dr. CCC</option>
-                    <option value="Dr. Eye">Dr. Eye</option>
-                </select>
-            </div>
-            <div>
-                <label for="pe-target-dept" class="form-label">Target Department (Optional)</label>
-                <select id="pe-target-dept" class="form-input form-select">
-                    <option value="" selected>(None)</option>
-                    <option value="101 อายุรกรรม">101 อายุรกรรม</option>
-                    <option value="201 ฉุกเฉิน">201 ฉุกเฉิน</option>
-                    <option value="301 คลินิกพิเศษ">301 คลินิกพิเศษ</option>
-                </select>
+
+            <div class="md:col-span-2 space-y-4">
+                <div>
+                    <label for="pe-target-dvm" class="form-label">Target DVM (Optional)</label>
+                    <select id="pe-target-dvm" class="form-input form-select">
+                        <option value="" selected>(None)</option>
+                        <option value="Dr. AAA">Dr. AAA</option>
+                        <option value="Dr. BBB">Dr. BBB</option>
+                        <option value="Dr. CCC">Dr. CCC</option>
+                        <option value="Dr. Eye">Dr. Eye</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="pe-target-dept" class="form-label">Target Department (Optional)</label>
+                    <select id="pe-target-dept" class="form-input form-select">
+                        <option value="" selected>(None)</option>
+                        <option value="101 อายุรกรรม">101 อายุรกรรม</option>
+                        <option value="201 ฉุกเฉิน">201 ฉุกเฉิน</option>
+                        <option value="301 คลินิกพิเศษ">301 คลินิกพิเศษ</option>
+                    </select>
+                </div>
             </div>
         </div>
     </section>
@@ -47,31 +53,48 @@
             2. Select Orders (เลือกรายการตรวจ)
         </h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            
-        <div class="space-y-3">
-            <p class="font-medium dark:text-[--color-text-base]">Select Orders for Set:</p>
+            <div class="md:col-span-1 space-y-3">
+                <p class="font-medium dark:text-[--color-text-base]">Select Orders for Set:</p>
 
-            <button id="btn-order-pe-vitals" class="w-full text-left p-3 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-[--color-primary-600] dark:hover:bg-[--color-primary-700] text-white">
-                <div class="font-semibold flex items-center">
-                    <i data-lucide="heart-pulse" class="w-4 h-4 mr-2"></i>
-                    Order Vital Signs
-                </div>
-                <p class="text-xs text-blue-200 dark:text-blue-200 mt-1">สั่งตรวจวัดสัญญาณชีพ (Temp, HR, RR, BP, ฯฯ)</p>
-            </button>
+                <button id="btn-order-pe-vitals" class="w-full text-left p-3 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-[--color-primary-600] dark:hover:bg-[--color-primary-700] text-white">
+                    <div class="font-semibold flex items-center">
+                        <i data-lucide="heart-pulse" class="w-4 h-4 mr-2"></i>
+                        Order Vital Signs
+                    </div>
+                    <p class="text-xs text-blue-200 dark:text-blue-200 mt-1">
+                        (Temp, HR, RR, BP, Pulse, CRT, FBS, MM, Lung, Heart, Pulse Quality, LOC, Pain, Critical Events, Note)
+                    </p>
+                </button>
 
-            <button id="btn-order-pe-eye" class="w-full text-left p-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white">
-                <div class="font-semibold flex items-center">
-                    <i data-lucide="eye" class="w-4 h-4 mr-2"></i>
-                    Order Eye Exam
-                </div>
-                <p class="text-xs text-indigo-200 dark:text-indigo-200 mt-1">สั่งตรวจตา (PLR, IOP, STT, ฯฯ)</p>
-            </button>
-        </div>
+                <button id="btn-order-pe-eye" class="w-full text-left p-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white">
+                    <div class="font-semibold flex items-center">
+                        <i data-lucide="eye" class="w-4 h-4 mr-2"></i>
+                        Order Eye Exam
+                    </div>
+                    <p class="text-xs text-indigo-200 dark:text-indigo-200 mt-1">
+                        (PLR, Palpebral, Dazzle, Menace, STT, Fluorescein, IOP, Note)
+                    </p>
+                </button>
 
+                <button id="btn-order-pe-other-a" class="w-full text-left p-3 rounded-lg bg-gray-400 hover:bg-gray-500 dark:bg-gray-600 dark:hover:bg-gray-500 text-white">
+                    <div class="font-semibold flex items-center">
+                        <i data-lucide="beaker" class="w-4 h-4 mr-2"></i>
+                        Order Other A (Test)
+                    </div>
+                    <p class="text-xs text-gray-200 dark:text-gray-300 mt-1">(Lab / Blood test...)</p>
+                </button>
+                <button id="btn-order-pe-other-b" class="w-full text-left p-3 rounded-lg bg-gray-400 hover:bg-gray-500 dark:bg-gray-600 dark:hover:bg-gray-500 text-white">
+                    <div class="font-semibold flex items-center">
+                        <i data-lucide="bone" class="w-4 h-4 mr-2"></i>
+                        Order Other B (Test)
+                    </div>
+                    <p class="text-xs text-gray-200 dark:text-gray-300 mt-1">(X-Ray / Imaging...)</p>
+                </button>
+            </div>
 
-            <div class="border dark:border-[--color-border-base] rounded-lg p-3 bg-gray-50 dark:bg-[--color-bg-secondary]">
+            <div class="md:col-span-2 border dark:border-[--color-border-base] rounded-lg p-3 bg-gray-50 dark:bg-[--color-bg-secondary]">
                 <h3 class="font-semibold mb-3 dark:text-[--color-text-base]">Current Order Set:</h3>
                 <ul id="pe-order-summary-list" class="space-y-2 text-xs">
                     <li id="pe-summary-placeholder" class="text-gray-500 dark:text-[--color-text-muted]">

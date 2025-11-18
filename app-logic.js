@@ -1,4 +1,4 @@
-// This is app-logic.js
+// This is app-logic.js (BETA 3.2 - Updated File)
 
 // ***** START: EYE EXAM HISTORY FUNCTIONS (MODIFIED) *****
 function renderEyeExamHistoryTable(data) {
@@ -106,16 +106,12 @@ async function loadModuleContent(contentFile) {
         } else if (contentFile === 'ext_doc_content.html') {
             // (ใหม่) เรียกใช้ตัวเริ่มต้นของโมดูล Ext Doc
             initializeExtDocScripts();
-        /* VVVV เพิ่มโค้ด 3 บรรทัดนี้เข้าไป VVVV */
         } else if (contentFile === 'extdoc_page_addnew.html') {
             // (ใหม่) เรียกใช้ตัวเริ่มต้นของหน้า Add New Ext Doc
             initializeExtDocAddNewPage();
-        /* ^^^^ สิ้นสุดโค้ดที่เพิ่ม ^^^^ */
-        /* VVVV เพิ่มโค้ด 3 บรรทัดนี้เข้าไป VVVV */
         } else if (contentFile === 'order_pe_content.html') {
             // (ใหม่) เรียกใช้ตัวเริ่มต้นของหน้า Order PE
             initializeOrderPEScripts();
-        /* ^^^^ สิ้นสุดโค้ดที่เพิ่ม ^^^^ */
         }
         // ... (เพิ่มเงื่อนไขสำหรับโมดูลอื่นๆ ในอนาคต) ...
 
@@ -193,22 +189,23 @@ function initializeAssessmentScripts() {
         problemListModal.dataset.listenerAttached = 'true';
     }
 
-    // --- Copy to Clipboard (Dynamic Content) ---
+    // --- Copy to Clipboard (Dynamic Content) (*** BETA 3.2 UPDATED ***) ---
     const copyAssessmentBtn = document.getElementById('copy-assessment-note-btn');
     const assessmentContent = document.getElementById('assessment-note-content');
-    const assessmentMsg = document.getElementById('copy-msg-assessment');
+    // (ลบ assessmentMsg)
     const copyProblemBtn = document.getElementById('copy-problem-list-btn');
     const problemContent = document.getElementById('problem-list-content');
-    const problemMsg = document.getElementById('copy-msg-problem');
+    // (ลบ problemMsg)
     const copyDiagnosisBtn = document.getElementById('copy-diagnosis-btn');
     const diagnosisContent = document.getElementById('diagnosis-content');
-    const diagnosisMsg = document.getElementById('copy-msg-diagnosis');
+    // (ลบ diagnosisMsg)
 
     if (copyAssessmentBtn && assessmentContent) {
         copyAssessmentBtn.addEventListener('click', () => {
             const textToCopy = assessmentContent.innerText || assessmentContent.textContent;
             if (copyToClipboard(textToCopy)) {
-                showCopyMessage(assessmentMsg);
+                // (เปลี่ยนฟังก์ชัน และส่ง "ปุ่ม" เข้าไปแทน)
+                showSparkleCopyEffect(copyAssessmentBtn);
             }
         });
     }
@@ -216,7 +213,8 @@ function initializeAssessmentScripts() {
         copyProblemBtn.addEventListener('click', () => {
             const textToCopy = problemContent.innerText || problemContent.textContent;
             if (copyToClipboard(textToCopy)) {
-                showCopyMessage(problemMsg);
+                // (เปลี่ยนฟังก์ชัน และส่ง "ปุ่ม" เข้าไปแทน)
+                showSparkleCopyEffect(copyProblemBtn);
             }
         });
     }
@@ -224,10 +222,12 @@ function initializeAssessmentScripts() {
         copyDiagnosisBtn.addEventListener('click', () => {
             const textToCopy = diagnosisContent.innerText || diagnosisContent.textContent;
             if (copyToClipboard(textToCopy)) {
-                showCopyMessage(diagnosisMsg);
+                // (เปลี่ยนฟังก์ชัน และส่ง "ปุ่ม" เข้าไปแทน)
+                showSparkleCopyEffect(copyDiagnosisBtn);
             }
         });
     }
+    // --- (END BETA 3.2 UPDATE) ---
 
     // --- Assessment History Table Sort (Dynamic Content) ---
     const assessmentHistoryTableBody = document.getElementById('assessment-history-table-body');

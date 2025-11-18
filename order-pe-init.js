@@ -1,4 +1,4 @@
-// This is order-pe-init.js
+// This is order-pe-init.js (BETA 3.2 - Updated File)
 // ทำหน้าที่ "เริ่มต้นการทำงาน" (Initialize) ของโมดูล Order PE
 
 // (ตัวแปรชั่วคราวสำหรับเก็บ Order ที่เลือกไว้ก่อนกด Save Set)
@@ -10,6 +10,10 @@ function initializeOrderPEScripts() {
     // --- 1. ค้นหา Element ที่ต้องใช้ ---
     const btnOrderVitals = document.getElementById('btn-order-pe-vitals');
     const btnOrderEye = document.getElementById('btn-order-pe-eye');
+    // (*** ใหม่: เพิ่ม 2 ปุ่มสีเทา ***)
+    const btnOrderOtherA = document.getElementById('btn-order-pe-other-a');
+    const btnOrderOtherB = document.getElementById('btn-order-pe-other-b');
+
     const btnSaveOrderSet = document.getElementById('btn-save-order-set');
     const orderSummaryList = document.getElementById('pe-order-summary-list');
     const summaryPlaceholder = document.getElementById('pe-summary-placeholder');
@@ -53,6 +57,18 @@ function initializeOrderPEScripts() {
     if (btnOrderEye) {
         btnOrderEye.addEventListener('click', () => {
             openOrderNoteModal('Eye Exam', 'Eye Exam');
+        });
+    }
+
+    // (*** ใหม่: ผูก Event ให้ 2 ปุ่มสีเทา ***)
+    if (btnOrderOtherA) {
+        btnOrderOtherA.addEventListener('click', () => {
+            openOrderNoteModal('Other A', 'Order Other A (Test)');
+        });
+    }
+    if (btnOrderOtherB) {
+        btnOrderOtherB.addEventListener('click', () => {
+            openOrderNoteModal('Other B', 'Order Other B (Test)');
         });
     }
     
@@ -138,9 +154,11 @@ function initializeOrderPEScripts() {
             }
 
             // (สร้าง Target Timestamp)
+            // (*** FIX: ใช้ formatKAHISDateTime จาก app-init.js ***)
             const targetTimestamp = formatKAHISDateTime(new Date(`${targetDate}T${targetTime}`));
             
             // (สร้างเวลาที่บันทึกจริง)
+            // (*** FIX: ใช้ formatKAHISDateTime จาก app-init.js ***)
             const recordTimestamp = formatKAHISDateTime(new Date()); 
             const orderNo = `ORD-${Date.now()}`;
             const loginUser = "User (Login)"; // (สมมติ User ที่ Login)
@@ -170,7 +188,7 @@ function initializeOrderPEScripts() {
                     disable_remark: ""
                 };
 
-                // (Push เข้าฐานข้อมูลกลาง)
+                // (Push เข้าฐานข้อมูลกลาง - activityLogData มาจาก app-data.js)
                 activityLogData.push(newEntry);
             });
 
@@ -181,6 +199,7 @@ function initializeOrderPEScripts() {
             // (เคลียร์ค่าและกลับไปหน้า Assessment)
             currentOrderSet = [];
             updateOrderSummaryUI();
+            // (loadModuleContent มาจาก app-logic.js)
             loadModuleContent('assessment_content.html');
         });
     }
