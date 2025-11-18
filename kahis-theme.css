@@ -402,3 +402,15 @@ START: BETA 3.2 (BETA 4.1) Copy Sparkle Effect
 END: BETA 3.2 Copy Sparkle Effect
 ===============================================
 */
+
+/* ***** START: BETA 4.0 - LIS/Path Button Colors ***** */
+.bg-pink-600 { background-color: #db2777; }
+.hover\:bg-pink-700:hover { background-color: #be185d; }
+.dark .bg-pink-600 { background-color: #db2777; }
+.dark .hover\:bg-pink-700:hover { background-color: #be185d; }
+
+.bg-fuchsia-700 { background-color: #701a75; }
+.hover\:bg-fuchsia-800:hover { background-color: #581c87; }
+.dark .bg-fuchsia-700 { background-color: #701a75; }
+.dark .hover\:bg-fuchsia-800:hover { background-color: #581c87; }
+/* ***** END: BETA 4.0 ***** */
