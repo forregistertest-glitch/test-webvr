@@ -1,6 +1,48 @@
 # KAHIS EMR PROTOTYPE - VERSION.MD
 (เรียงลำดับจากใหม่ล่าสุดไปเก่าสุด)
 
+## BETA 4.0 VERSION (LIS & Path Module Integration / Modal Architecture Refactor)
+(18 พฤศจิกายน 2025)
+
+### วัตถุประสงค์ (Objective)
+เพิ่มโมดูลการสั่งตรวจทางห้องปฏิบัติการ (LIS Request) และพยาธิวิทยา (Path Request) พร้อมทั้งปรับปรุงโครงสร้างพื้นฐานของ Modal ให้รองรับการแสดงผลแบบ Fixed Layout และ Responsive ที่ดียิ่งขึ้น
+
+### สิ่งที่อัพเดท (Core Concepts)
+1.  **LIS Request Module:** เพิ่มระบบสั่งตรวจ Lab ที่มีความซับซ้อน รองรับการเลือก Category, Cost Items และ Preview ก่อนสั่ง
+2.  **Path Request Module:** เพิ่มปุ่มและ Modal รองรับระบบ Path Request (Prototype)
+3.  **Modal Architecture Refactor:** เปลี่ยนโครงสร้าง CSS ของ Modal ทั้งหมดจาก `sticky` เป็น `Flexbox` เพื่อแก้ปัญหา Header เลื่อนตาม และ Scrollbar ซ้อน
+4.  **Standardized Table UI:** ปรับแต่งตาราง History ทั้งหมด (VS, Eye, LIS, Assessment, ExtDoc) ให้มี Sticky Header, Sticky First Column และ Hover Effect ที่เป็นมาตรฐานเดียวกัน
+5.  **Tab Menu Update:** เปลี่ยนชื่อแท็บ "Order LOR" เป็น "Order Path"
+
+### แผนการอัพเดท (Implementation Details)
+
+#### ส่วนที่ 1: (HTML/CSS) LIS Module & Modal Refactor
+1.  **`index.html` (แก้ไข):**
+    * เพิ่มปุ่ม FAB (Floating Action Button) ใหม่ 2 ปุ่ม: **LIS Request** (สีชมพู `#db2777`) และ **Path Request** (สีม่วง `#701a75`)
+    * สร้าง Modal `#lis-popup-modal` ใหม่ โดยใช้โครงสร้าง **Flexbox (Header + Sidebar + Main)**
+    * กำหนด `max-height: 90vh` และ `overflow: hidden` ที่ Container หลัก เพื่อป้องกันปุ่ม Save ล้นจอ
+2.  **`kahis-theme.css` (แก้ไข):**
+    * เพิ่มคลาส `.list-frame`, `.list-header`, `.list-body` เพื่อจัดการ Scroll ภายในเฟรมเลือกรายการ (Select Tests)
+    * เพิ่ม CSS สำหรับ **Global Sticky Table** เพื่อให้หัวตารางและคอลัมน์แรกของทุกตารางลอยติดขอบจอเสมอ
+
+#### ส่วนที่ 2: (JS) LIS Logic & Interactivity
+3.  **`app-init.js` (แก้ไข):**
+    * เพิ่ม Logic ควบคุม LIS Modal:
+        * **Interactive Selection:** คลิก Category (ซ้าย) -> โหลด Cost Items (กลาง) -> ติ๊กเลือก -> แสดง Preview (ขวา)
+        * **Add to List:** ปุ่ม "Add Selected Tests" จะดึงข้อมูลลงตารางสรุปด้านล่างพร้อมปุ่มลบ
+        * **Tab Switching:** สลับระหว่างหน้า "New LIS Request" และ "History"
+    * เชื่อมต่อปุ่ม "Save LIS Request" ให้สลับไปแสดงหน้า **Summary View** (Success screen)
+4.  **`app-data.js` (แก้ไข):**
+    * เพิ่มข้อมูลตัวอย่าง (Mock Data) สำหรับ LIS History 20 รายการ ลงใน `activityLogData`
+
+#### ส่วนที่ 3: (HTML/JS) Eye Exam & Vital Signs Polish
+5.  **`index.html` (แก้ไข):**
+    * ปรับแก้หัวตาราง Eye Exam ให้แสดงผล (OD)/(OS) เป็นบรรทัดใหม่ (`.eye-header-multiline`) เพื่อความสวยงามและประหยัดพื้นที่
+6.  **`app-logic.js` (แก้ไข):**
+    * อัปเดตฟังก์ชัน `renderEyeExamHistoryTable` ให้รองรับคอลัมน์ Meta Data (DVM, Dept, User, Time) และย้ายคอลัมน์ DVM ไปด้านหลัง
+7.  **`app-init.js` (แก้ไข):**
+    * กู้คืน Logic ของ **Problem List** ที่หายไป ให้กลับมาทำงานคลิกเลือกหมวดหมู่ได้ปกติ
+
 ## BETA 3.4 VERSION (Edit Copy effect Sparking)
 (18 พฤศจิกายน 2025)
 
@@ -344,5 +386,6 @@ function showSparkleCopyEffect(buttonElement) {
 * **Dark Mode / Theme:** มีระบบสลับ Theme (Light/Dark) ซึ่งถูกกำหนดค่าสีไว้ใน `kahis-theme.css` (โดย Dark Mode เป็นธีมสีเบจ/น้ำตาล)
 * **Modals (Pop-ups) ที่ซับซ้อน:** (Vital Signs, Eye Exam, Problem List) ที่มี Logic การทำงานภายในตัวเอง
 * **Dynamic History Tables:** ตารางประวัติ (ใน Assessment, Vital Signs, Eye Exam) ถูกสร้างขึ้นด้วย JavaScript และมีระบบ Sort ข้อมูล
+
 
 * **Client-Side Data:** ข้อมูลประวัติทั้งหมด (`vsHistoryData`, `eyeExamHistoryData`, `categoryData`) ถูกเก็บไว้ในตัวแปร JavaScript (Hardcoded)
