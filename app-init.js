@@ -1,4 +1,4 @@
-// This is app-init.js (BETA 3.1 - Bug Fix v4 - COMPLETE FILE)
+// This is app-init.js (BETA 3.1 - Bug Fix v5 - COMPLETE FILE)
 // It contains all the logic formerly inside app.js's DOMContentLoaded listener
 
 function initializeApp() {
@@ -13,56 +13,104 @@ function initializeApp() {
     loadModuleContent(initialContent || 'assessment_content.html');
     // +++ END: EMR Tab Loading Logic (NEW) +++
     
-    // --- Dark Mode ---
-    const toggle = document.getElementById('darkmode-toggle');
+    // --- (ใหม่) BETA 3.1 Logic สำหรับปุ่มลอยด้านขวา ---
     const htmlRoot = document.documentElement; 
-    const preference = localStorage.getItem('theme');
+    const themeBtnLight = document.getElementById('theme-btn-light');
+    const themeBtnDark = document.getElementById('theme-btn-dark');
+    const goToTopBtn = document.getElementById('go-to-top-btn');
 
+    // 1. ฟังก์ชันสลับธีม (ยังคงใช้ .dark class เหมือนเดิม)
     function applyTheme(theme) {
         if (theme === 'dark') {
-            htmlRoot.classList.add('dark'); 
-            if(toggle) toggle.checked = true;
+            htmlRoot.classList.add('dark');
         } else {
-            htmlRoot.classList.remove('dark'); 
-            if(toggle) toggle.checked = false;
+            htmlRoot.classList.remove('dark');
         }
+        // บันทึกธีมที่เลือกลงใน localStorage
+        localStorage.setItem('theme', theme);
     }
-    applyTheme(preference);
-    if (toggle) {
-        toggle.addEventListener('change', () => {
-            const newTheme = toggle.checked ? 'dark' : 'light';
-            applyTheme(newTheme);
-            localStorage.setItem('theme', newTheme);
+
+    // 2. ผูก Event ให้ปุ่มธีม
+    if (themeBtnLight) {
+        themeBtnLight.addEventListener('click', () => {
+            applyTheme('light');
+        });
+    }
+    if (themeBtnDark) {
+        themeBtnDark.addEventListener('click', () => {
+            applyTheme('dark'); // (เรายังเรียกธีมสีเบจว่า 'dark' ในระบบ)
         });
     }
 
-    // --- Modal: DF ---
-    const openButton = document.getElementById('open-df-popup');
+    // 3. โหลดธีมตอนเปิดหน้า
+    const preference = localStorage.getItem('theme');
+    applyTheme(preference || 'light'); // (ถ้าไม่มีค่า ให้ใช้ 'light')
+
+    // 4. ผูก Event ให้ปุ่ม Go to Top
+    if (goToTopBtn) {
+        goToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+    // --- (จบ) BETA 3.1 Logic สำหรับปุ่มลอยด้านขวา ---
+    
+
+    // --- Modal: DF (*** แก้ไข: คง Logic ปิดไว้ ***) ---
     const modal = document.getElementById('df-popup-modal');
     const closeButtonX = document.getElementById('df-popup-close-x');
     const cancelButton = document.getElementById('df-popup-cancel');
     const showPopup = () => { if (modal) modal.classList.remove('hidden'); };
     const hidePopup = () => { if (modal) modal.classList.add('hidden'); };
-    if (openButton) openButton.addEventListener('click', showPopup);
+    // (ลบ openButton เก่า)
     if (closeButtonX) closeButtonX.addEventListener('click', hidePopup);
     if (cancelButton) cancelButton.addEventListener('click', hidePopup);
     if (modal) { modal.addEventListener('click', (event) => { if (event.target === modal) hidePopup(); }); }
 
-    // --- Modal: TF ---
-    const openButtonTF = document.getElementById('open-tf-popup');
+    // --- Modal: TF (*** แก้ไข: คง Logic ปิดไว้ ***) ---
     const modalTF = document.getElementById('tf-popup-modal');
     const closeButtonXTF = document.getElementById('tf-popup-close-x');
     const cancelButtonTF = document.getElementById('tf-popup-cancel');
     const showPopupTF = () => { if (modalTF) modalTF.classList.remove('hidden'); };
     const hidePopupTF = () => { if (modalTF) modalTF.classList.add('hidden'); };
-    if (openButtonTF) openButtonTF.addEventListener('click', showPopupTF);
+    // (ลบ openButtonTF เก่า)
     if (closeButtonXTF) closeButtonXTF.addEventListener('click', hidePopupTF);
     if (cancelButtonTF) cancelButtonTF.addEventListener('click', hidePopupTF);
     if (modalTF) { modalTF.addEventListener('click', (event) => { if (event.target === modalTF) hidePopupTF(); }); }
 
+    
+    // --- (ใหม่) BETA 3.1 Logic สำหรับปุ่มลอยด้านซ้าย (เมนูเลื่อน) ---
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+    const actionMenu = document.getElementById('action-menu-container');
+    const iconOpen = document.getElementById('menu-icon-open');
+    const iconClose = document.getElementById('menu-icon-close');
+
+    if (menuToggleBtn && actionMenu && iconOpen && iconClose) {
+        menuToggleBtn.addEventListener('click', () => {
+            // (*** FIX ***) สลับ class 'active' บน container ของเมนู
+            actionMenu.classList.toggle('active');
+            
+            // (*** FIX ***) สลับไอคอนปุ่ม
+            iconOpen.classList.toggle('hidden');
+            iconClose.classList.toggle('hidden');
+        });
+    }
+
+    // (*** FIX ***) (ย้าย Event Listener มาผูกกับปุ่ม FAB ใหม่)
+    const openButtonDF_fab = document.getElementById('open-df-popup-fab');
+    const openButtonTF_fab = document.getElementById('open-tf-popup-fab');
+    const openVitalsButton_fab = document.getElementById('open-vitals-popup-fab');
+    const openEyeButton_fab = document.getElementById('open-eye-popup-fab');
+
+    // (Logic การเปิด Modal (ที่เราคงไว้ข้างบน) จะถูกเรียกโดยปุ่มใหม่นี้)
+    if (openButtonDF_fab) openButtonDF_fab.addEventListener('click', showPopup);
+    if (openButtonTF_fab) openButtonTF_fab.addEventListener('click', showPopupTF);
+    // (showVitalsPopup และ showEyePopup อยู่ด้านล่าง)
+    // --- (จบ) BETA 3.1 Logic สำหรับปุ่มลอยด้านซ้าย ---
+
+
     // --- Modal: Vital Signs (อัปเกรด BETA 3.1) ---
     // (*** ลบโค้ดที่ซ้ำซ้อนออกแล้ว ***)
-    const openVitalsButton = document.getElementById('open-vitals-popup');
+    // (*** (แก้ไข) ลบ openVitalsButton เก่าออก ***)
     const vitalsModal = document.getElementById('vitals-popup-modal');
     const closeVitalsX = document.getElementById('close-vitals-popup-x');
     const closeVitalsCancel = document.getElementById('close-vitals-popup-cancel');
@@ -76,17 +124,15 @@ function initializeApp() {
         }
         
         // --- (FIX 1/2) แปลงข้อมูล activityLogData ให้ตารางเดิมอ่านได้ ---
-        // (activityLogData มาจาก app-data.js)
         const filteredVitals = activityLogData.filter(entry => 
             entry.activity_type === "Vital Signs" && entry.status === "Done"
         );
         
-        // (แปลง Data Model ใหม่ กลับไปเป็น Data Model เก่า ที่ renderVsHistoryTable ต้องการ)
         const legacyVsHistoryData = filteredVitals.map(entry => {
             return {
                 id: entry.entry_id,
-                datetimeSort: new Date(entry.effective_time).toISOString(), // (ต้องแปลงกลับ)
-                datetime: entry.effective_time.split(',')[0], // (เอาแค่วันที่)
+                datetimeSort: new Date(entry.effective_time).toISOString(), 
+                datetime: entry.effective_time.split(',')[0], 
                 bp: entry.parameters.BP,
                 pulse: entry.parameters.Pulse,
                 hr: entry.parameters.HR,
@@ -107,8 +153,7 @@ function initializeApp() {
             };
         });
         
-        // (เรียกฟังก์ชัน Render เดิม แต่ใช้ข้อมูลใหม่ที่แปลงแล้ว)
-        // (*** ย้าย Logic การ Sort และ Render มาไว้ "ข้างใน" นี้ ***)
+        // (ย้าย Logic การ Sort และ Render มาไว้ "ข้างใน" นี้)
         sortVsData(legacyVsHistoryData, vsCurrentSort.column, vsCurrentSort.direction);
         renderVsHistoryTable(legacyVsHistoryData);
         vsHistoryHeaders.forEach(header => {
@@ -119,7 +164,8 @@ function initializeApp() {
     };
     const hideVitalsPopup = () => { if (vitalsModal) vitalsModal.classList.add('hidden'); };
 
-    if (openVitalsButton) openVitalsButton.addEventListener('click', showVitalsPopup);
+    // (*** (แก้ไข) ผูก Event กับปุ่ม FAB ใหม่ ***)
+    if (openVitalsButton_fab) openVitalsButton_fab.addEventListener('click', showVitalsPopup);
     if (closeVitalsX) closeVitalsX.addEventListener('click', hideVitalsPopup);
     if (closeVitalsCancel) closeVitalsCancel.addEventListener('click', hideVitalsPopup);
     if (vitalsModal) { 
@@ -129,7 +175,7 @@ function initializeApp() {
     }
     
     // --- Modal: Eye Exam (อัปเกรด BETA 3.1) ---
-    const openEyeButton = document.getElementById('open-eye-popup');
+    // (*** (แก้ไข) ลบ openEyeButton เก่าออก ***)
     const eyeModal = document.getElementById('eye-exam-modal');
     const closeEyeX = document.getElementById('close-eye-popup-x');
     const closeEyeCancel = document.getElementById('close-eye-popup-cancel');
@@ -146,11 +192,10 @@ function initializeApp() {
         );
 
         const legacyEyeHistoryData = filteredEye.map(entry => {
-            // (ฟังก์ชัน renderEyeExamHistoryTable อยู่ใน app-logic.js)
             return {
                 datetimeSort: new Date(entry.effective_time).toISOString(),
                 datetime: entry.effective_time.split(',')[0],
-                dvm: entry.dvm || '', // (ใช้ค่าว่างแทน N/A)
+                dvm: entry.dvm || '', 
                 plr_od: entry.parameters.plr_od,
                 plr_os: entry.parameters.plr_os,
                 palpebral_od: entry.parameters.palpebral_od,
@@ -165,11 +210,11 @@ function initializeApp() {
                 iop_os: entry.parameters.iop_os,
                 fluorescein_od: entry.parameters.fluorescein_od,
                 fluorescein_os: entry.parameters.fluorescein_os,
-                imageUrl: (entry.parameters.Note) ? 'eyeexam.png' : null // (สมมติว่ามีรูปถ้ามี Note)
+                imageUrl: (entry.parameters.Note) ? 'eyeexam.png' : null 
             };
         });
 
-        renderEyeExamHistoryTable(legacyEyeHistoryData); // (เรียกฟังก์ชัน Render เดิม)
+        renderEyeExamHistoryTable(legacyEyeHistoryData); 
         
         if (typeof lucide !== 'undefined') {
             lucide.createIcons(); 
@@ -177,11 +222,13 @@ function initializeApp() {
     };
     const hideEyePopup = () => { if (eyeModal) eyeModal.classList.add('hidden'); };
     
-    if (openEyeButton) openEyeButton.addEventListener('click', showEyePopup);
+    // (*** (แก้ไข) ผูก Event กับปุ่ม FAB ใหม่ ***)
+    if (openEyeButton_fab) openEyeButton_fab.addEventListener('click', showEyePopup);
     if (closeEyeX) closeEyeX.addEventListener('click', hideEyePopup);
     if (closeEyeCancel) closeEyeCancel.addEventListener('click', hideEyePopup);
     
     // --- Modal: Drawing Demo (NEW) ---
+    // ( ... โค้ดส่วนนี้คงเดิม ... )
     const drawingModal = document.getElementById('drawing-demo-modal');
     const closeDrawingX = document.getElementById('close-drawing-demo-x');
     const cancelDrawingBtn = document.getElementById('drawing-demo-cancel');
@@ -190,10 +237,9 @@ function initializeApp() {
     
     const showDrawingPopup = () => {
         if (drawingModal) drawingModal.classList.remove('hidden');
-        // Load local file 'eyeexam.png'
         initializeDrawingDemo('eyeexam.png'); 
         if (typeof lucide !== 'undefined') {
-            lucide.createIcons(); // Render icons in drawing modal
+            lucide.createIcons();
         }
     }
     const hideDrawingPopup = () => { if (drawingModal) drawingModal.classList.add('hidden'); }
@@ -202,18 +248,18 @@ function initializeApp() {
     if (closeDrawingX) closeDrawingX.addEventListener('click', hideDrawingPopup);
     if (cancelDrawingBtn) cancelDrawingBtn.addEventListener('click', hideDrawingPopup);
     
-    // "Fake Save" logic
     if (saveDrawingBtn) {
         saveDrawingBtn.addEventListener('click', () => {
             if (fabricCanvas) {
                 const dataURL = fabricCanvas.toDataURL({ format: 'png', quality: 0.8 });
                 drawingResultImg.src = dataURL;
-                hideDrawingPopup(); // ซ่อนหน้าต่างวาดภาพ
+                hideDrawingPopup();
             }
         });
     }
 
     // --- Modal: Image Viewer (NEW) ---
+    // ( ... โค้ดส่วนนี้คงเดิม ... )
     const imageViewerModal = document.getElementById('image-viewer-modal');
     const closeImageViewerX = document.getElementById('close-image-viewer-x');
     const fullImageViewerSrc = document.getElementById('full-image-viewer-src');
@@ -223,70 +269,57 @@ function initializeApp() {
     
     if (eyeHistoryTableBody) {
         eyeHistoryTableBody.addEventListener('click', function(event) {
-            // เช็คว่ากดที่รูป thumbnail (ที่มี class 'history-thumbnail')
             if (event.target.classList.contains('history-thumbnail')) {
-                fullImageViewerSrc.src = event.target.dataset.fullSrc; // ใช้ data-full-src
-                imageViewerModal.classList.remove('hidden'); // แสดง modal
+                fullImageViewerSrc.src = event.target.dataset.fullSrc;
+                imageViewerModal.classList.remove('hidden');
             }
         });
     }
     if (closeImageViewerX) closeImageViewerX.addEventListener('click', hideImageViewer);
     if (imageViewerModal) imageViewerModal.addEventListener('click', (event) => {
-        if (event.target === imageViewerModal) hideImageViewer(); // ปิดเมื่อคลิกพื้นหลัง
+        if (event.target === imageViewerModal) hideImageViewer();
     });
 
     // --- (NEW) Numpad Modal Logic ---
+    // ( ... โค้ดส่วนนี้คงเดิม ... )
     const numpadModal = document.getElementById('numpad-modal');
     const numpadTargetInput = document.getElementById('numpad-target-id');
     const numpadInputs = document.querySelectorAll('input[data-numpad="true"]');
 
     numpadInputs.forEach(input => {
         input.addEventListener('click', (e) => {
-            numpadTargetInput.value = e.target.id; // เก็บ id ของ input ที่ถูกคลิก
+            numpadTargetInput.value = e.target.id;
             numpadModal.classList.remove('hidden');
         });
     });
 
     if (numpadModal) {
         numpadModal.addEventListener('click', (e) => {
-            const target = e.target.closest('.numpad-btn'); // หปุ่มที่ถูกคลิก
+            const target = e.target.closest('.numpad-btn');
             if (!target) {
                  if (e.target === numpadModal) {
                      numpadModal.classList.add('hidden');
                  }
                  return;
             }
-
             const value = target.dataset.value;
             const targetInput = document.getElementById(numpadTargetInput.value);
             if (!targetInput) return;
-
             switch(value) {
-                case 'close':
-                    numpadModal.classList.add('hidden');
-                    break;
-                case 'clear':
-                    targetInput.value = '';
-                    break;
-                case 'backspace':
-                    targetInput.value = targetInput.value.slice(0, -1);
-                    break;
-                case '.':
-                    if (!targetInput.value.includes('.')) {
-                        targetInput.value += value;
-                    }
-                    break;
-                default: // 0-9
-                    targetInput.value += value;
-                    break;
+                case 'close': numpadModal.classList.add('hidden'); break;
+                case 'clear': targetInput.value = ''; break;
+                case 'backspace': targetInput.value = targetInput.value.slice(0, -1); break;
+                case '.': if (!targetInput.value.includes('.')) { targetInput.value += value; } break;
+                default: targetInput.value += value; break;
             }
         });
     }
 
     // --- Tab Switching Logic (Vital Signs) ---
+    // ( ... โค้ดส่วนนี้คงเดิม ... )
     vitalsTabLinks.forEach(link => {
         link.addEventListener('click', () => {
-            const tabId = link.dataset.tab; // e.g. "vitals-history"
+            const tabId = link.dataset.tab;
             vitalsTabLinks.forEach(tab => {
                 tab.classList.remove('tab-active');
                 tab.classList.add('tab-inactive');
@@ -302,10 +335,11 @@ function initializeApp() {
             }
         });
     });
-// --- Tab Switching Logic (Eye Exam) (NEW) ---
+    // --- Tab Switching Logic (Eye Exam) (NEW) ---
+    // ( ... โค้ดส่วนนี้คงเดิม ... )
     eyeTabLinks.forEach(link => {
         link.addEventListener('click', () => {
-            const tabId = link.dataset.tab; // e.g., "eye-history"
+            const tabId = link.dataset.tab;
             eyeTabLinks.forEach(tab => {
                 tab.classList.remove('tab-active');
                 tab.classList.add('tab-inactive');
@@ -323,6 +357,7 @@ function initializeApp() {
     });
 
     // --- Problem List Modal (Tagging Section) ---
+    // ( ... โค้ดส่วนนี้คงเดิม ... )
     const categoryList = document.getElementById('category-list');
     const categoryItems = categoryList ? categoryList.querySelectorAll('li[data-category-id]') : [];
     const resultTableBody = document.getElementById('result-table-body');
@@ -333,7 +368,6 @@ function initializeApp() {
         const selectedCount = resultTableBody.querySelectorAll('input[type="checkbox"]:checked').length;
         resultHeader.textContent = `Result (${selectedCount} selected)`;
     }
-
     function renderResultTable(categoryId) {
         if (!resultTableBody || !categoryData[categoryId]) return;
         const data = categoryData[categoryId];
@@ -344,17 +378,12 @@ function initializeApp() {
             data.forEach(item => {
                 const row = document.createElement('tr');
                 row.classList.add('hover:bg-gray-50', 'dark:hover:bg-[--color-bg-secondary]/50');
-                row.innerHTML = `
-                    <td class="p-3"><input type="checkbox"></td>
-                    <td class="p-3">${item.term}</td>
-                    <td class="p-3 text-xs text-gray-600 dark:text-[--color-text-muted]">${item.tags}</td>
-                `;
+                row.innerHTML = `<td class="p-3"><input type="checkbox"></td><td class="p-3">${item.term}</td><td class="p-3 text-xs text-gray-600 dark:text-[--color-text-muted]">${item.tags}</td>`;
                 resultTableBody.appendChild(row);
             });
         }
         updateSelectedCount(); 
     }
-
     if (categoryList && categoryItems.length > 0 && resultTableBody) {
         resultTableBody.addEventListener('click', (event) => {
             if (event.target.type === 'checkbox') {
@@ -378,7 +407,7 @@ function initializeApp() {
     
     
     // **** START: Vital Signs Internal Script (Merged - อัปเกรด BETA 3.1) ****
-    
+    // (*** (แก้ไข) ลบ const vsHistoryData = [...] ออก ***)
     const vsTableBody = document.getElementById('historyTableBody');
     const vsNoHistoryMessage = document.getElementById('noHistoryMessage');
     const vsHistoryHeaders = document.querySelectorAll('#historyTable .history-sort-header'); 

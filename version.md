@@ -1,6 +1,26 @@
 # KAHIS EMR PROTOTYPE - VERSION.MD
 (เรียงลำดับจากใหม่ล่าสุดไปเก่าสุด)
 
+## BETA 3.2 VERSION (Floating UI Refactor)
+(18 พฤศจิกายน 2025)
+
+### วัตถุประสงค์ (Objective)
+"รื้อ" (Refactor) แถบ Footer Bar ด้านล่างที่เกะกะ และแทนที่ด้วย "ปุ่มลอย" (Floating Action Buttons - FABs) เพื่อแก้ปัญหา UI ซ้อนทับ Pop-up และปรับปรุงระบบสลับธีม (2 ธีม)
+
+### สิ่งที่อัพเดท (Core Concepts)
+1.  **UI/UX:** เปลี่ยนจาก Footer Bar เป็นปุ่มลอย (FABs) ที่มุมล่างขวา
+2.  **Action Menu:** สร้างเมนูซ่อนด้านซ้าย (Slide-out Menu) สำหรับปุ่ม Action (DF, TF, VS, Eye) เพื่อประหยัดพื้นที่และป้องกันการกดซ้อน
+3.  **Theme Switcher:** เปลี่ยนจาก Checkbox (`<input>`) เป็นปุ่มกด 2 ปุ่ม (Light/Beige)
+4.  **Icons:** เปลี่ยนไอคอนปุ่ม Action เป็น `lucide-icons` ( `stethoscope`, `user-round-pen`, `activity`) แบบ Inline SVG
+
+### แผนการอัพเดท (The 5-Step Plan)
+* **เทคนิค:** แก้ไข HTML DOM, เพิ่ม CSS สำหรับ Animation, และย้าย Event Listeners
+1.  **`index.html` (แก้ไข):** **ลบ** `<footer ...>...</footer>` (แถบ Bar เดิม) ทิ้งทั้งหมด
+2.  **`index.html` (แก้ไข):** **เพิ่ม** โค้ด HTML สำหรับปุ่มลอย 2 ชุด (ชุดเมนูซ้าย และชุดธีม/Go to Top ขวา) (ใช้ Inline SVG จาก Lucide)
+3.  **`kahis-theme.css` (แก้ไข):** **เพิ่ม** CSS Class ใหม่สำหรับ `.fab-btn` และ `.action-menu-container` (รวมถึง `transition` และ `transform: translateX` สำหรับ Animation)
+4.  **`app-init.js` (แก้ไข):** **ลบ** Logic การสลับธีมแบบ Checkbox (`darkmode-toggle`) **เพิ่ม** Logic ใหม่สำหรับปุ่ม `#theme-btn-light` / `#theme-btn-dark` และ `#go-to-top-btn` (ยังคงใช้ `classList.add/remove('dark')` เหมือนเดิม)
+5.  **`app-init.js` (แก้ไข):** **ลบ** Event Listener ของปุ่ม Footer เก่า (`#open-df-popup` ฯลฯ) **เพิ่ม** Logic ใหม่สำหรับปุ่มเมนู (`#menu-toggle-btn`) และ "ต่อสายไฟใหม่" ให้ปุ่ม FABs (`#open-df-popup-fab` ฯลฯ) ไปเรียกฟังก์ชัน `showPopup()`, `showVitalsPopup()` ฯลฯ
+
 ## BETA 3.1 VERSION (Bug Fixing & Data Population)
 (17 พ.ย. 2025)
 

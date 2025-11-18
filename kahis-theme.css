@@ -271,3 +271,59 @@ th { background-color: var(--color-bg-secondary, #f3f4f6); cursor: pointer; }
     filter: invert(0.6);
 }
 /* **** END: Styles from VitalSign_Prototype.html **** */
+/* ===============================================
+START: BETA 3.1 (BETA 4.0) Floating Action Button Styles
+===============================================
+*/
+
+/* 1. สไตล์ของปุ่มลอย (FAB) */
+.fab-btn {
+    width: 3rem;  /* 48px */
+    height: 3rem; /* 48px */
+    border-radius: 9999px; /* ทำให้กลม */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease-in-out;
+    
+    /* (ค่า Default สำหรับปุ่มที่ไม่มีสี เช่น Light Mode) */
+    background-color: white; 
+    color: rgb(55 65 81); /* text-gray-700 */
+}
+.fab-btn:hover {
+    transform: scale(1.1);
+}
+
+/* (แก้ไขสีไอคอน Lucide ในปุ่มสีสว่าง) */
+.fab-btn.text-gray-700 i[data-lucide] {
+    color: rgb(55 65 81);
+}
+.fab-btn.text-black i[data-lucide] {
+    color: #1f2937;
+}
+
+/* 2. สไตล์ของ "Container" ที่ซ่อนปุ่ม Action ไว้ */
+.action-menu-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* (space-x-3) */
+    
+    /* (สถานะเริ่มต้น: ซ่อน) */
+    opacity: 0;
+    transform: translateX(100%); 
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 3. สไตล์เมื่อเมนู "Active" (ถูกกดเปิด) */
+.action-menu-container.active {
+    opacity: 1;
+    transform: translateX(0); /* เลื่อนกลับมาที่เดิม */
+    pointer-events: auto;     /* ทำให้คลิกได้ */
+}
+
+/* ===============================================
+END: BETA 3.1 Floating Action Button Styles
+===============================================
+*/
