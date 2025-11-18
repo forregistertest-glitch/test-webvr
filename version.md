@@ -1,6 +1,199 @@
 # KAHIS EMR PROTOTYPE - VERSION.MD
 (เรียงลำดับจากใหม่ล่าสุดไปเก่าสุด)
 
+## BETA 3.4 VERSION (Edit Copy effect Sparking)
+(18 พฤศจิกายน 2025)
+
+## คำอธิบายการทำงาน: Effect ปุ่ม Copy (JavaScript)
+
+Effect การ Copy ที่เราสร้างขึ้น (Confetti + "Copied!" Glow) เป็นการทำงานร่วมกันของ 3 ส่วนหลัก:
+
+1.  **`index.html` (หรือไฟล์ Module):** เป็น "ตัวจุดชนวน"
+2.  **`app-helpers.js`:** เป็น "สมอง" ที่จัดการ Logic ทั้งหมด
+3.  **`kahis-theme.css`:** เป็น "สไตล์" ที่ทำให้ "Copied!" สวยงาม
+
+### แผนภาพการทำงาน (Flow)
+`HTML (onclick)` → `copyAndSparkle()` → `copyToClipboard()` → (ถ้าสำเร็จ) → `showSparkleCopyEffect()` → (ยิง Confetti + สร้าง "Copied!" Glow)
+
+### 1. (HTML) ตัวจุดชนวน
+ในไฟล์ HTML, ปุ่ม Copy จะเรียกใช้ฟังก์ชัน `copyAndSparkle()`
+เพิ่ม Script ใน index.html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
+### 2. (JS) app-helpers.js
+ไฟล์นี้มี 3 ฟังก์ชันที่ทำงานประสานกัน:
+
+A. copyAndSparkle(buttonElement, textToCopy)
+ฟังก์ชันนี้คือ "ผู้จัดการ" ที่เราเรียกจาก HTML
+
+JavaScript
+
+function copyAndSparkle(buttonElement, textToCopy) {
+    // 1. ลอง Copy ก่อน
+    const success = copyToClipboard(textToCopy);
+    
+    // 2. ถ้า Copy สำเร็จ...
+    if (success) {
+        // ...ค่อยยิง Effect
+        showSparkleCopyEffect(buttonElement);
+    }
+}
+หน้าที่: ตรวจสอบว่าการ Copy (โดย copyToClipboard) สำเร็จหรือไม่ (return true) ถ้าสำเร็จ ค่อยสั่งให้ showSparkleCopyEffect ทำงาน
+
+B. copyToClipboard(text)
+ฟังก์ชันนี้คือ "คนทำงาน" ที่ทำหน้าที่ Copy อย่างเดียว
+
+JavaScript
+
+function copyToClipboard(text) {
+    // สร้าง <textarea> ชั่วคราว
+    const textarea = document.createElement('textarea');
+    // ... (ตั้งค่า, ใส่ข้อความ) ...
+    try {
+        // สั่ง Copy
+        document.execCommand('copy');
+        return true; // สำเร็จ
+    } catch (err) {
+        return false; // ล้มเหลว
+    } finally {
+        // ... (ลบ <textarea> ทิ้ง) ...
+    }
+}
+หน้าที่: ใช้เทคนิค document.execCommand('copy') (ซึ่งเป็นวิธีที่ใช้ได้ในสภาพแวดล้อม iFrame) เพื่อคัดลอกข้อความ และส่งผลลัพธ์ true (สำเร็จ) หรือ false (ล้มเหลว) กลับไป
+
+C. showSparkleCopyEffect(buttonElement)
+นี่คือ "พระเอก" ของงาน ที่สร้าง Effect ทั้งหมด 2 ส่วนพร้อมกัน
+
+JavaScript
+
+function showSparkleCopyEffect(buttonElement) {
+    if (!buttonElement) return;
+
+    // --- ส่วนที่ 1: ยิง Confetti (Sparkles) ---
+    try {
+        // 1.1 หาตำแหน่งปุ่ม (เป็น Pixel)
+        const rect = buttonElement.getBoundingClientRect();
+        
+        // 1.2 แปลงเป็น % (0.0-1.0) ที่ Confetti ต้องการ
+        const originX = (rect.left + rect.width / 2) / window.innerWidth;
+        const originY = (rect.top + rect.height / 2) / window.innerHeight;
+
+        // 1.3 สั่งยิง (ถ้า library โหลดมาแล้ว)
+        if (typeof confetti === 'function') {
+            confetti({
+                angle: 270,        // พุ่งขึ้น
+                gravity: 0.8,      // ตกลงมา
+                scalar: 1.5,       // แรงยิง
+                particleCount: 80,
+                spread: 80,
+                origin: { x: originX, y: originY }
+                // ... (และค่าอื่นๆ)
+            });
+        }
+    } catch (e) { /* ... */ }
+
+    // --- ส่วนที่ 2: แสดง "Copied!" แบบ Glow ---
+    try {
+        // 2.1 สร้าง <span> "Copied!" ขึ้นมาใหม่
+        const toast = document.createElement('span');
+        toast.textContent = 'Copied!';
+        
+        // 2.2 (สำคัญ!) ใส่ CSS Class ที่กำหนดใน kahis-theme.css
+        toast.className = 'copied-sparkle-toast'; 
+        
+        // 2.3 เพิ่มเข้าในหน้าเว็บ
+        document.body.appendChild(toast);
+
+        // 2.4 คำนวณตำแหน่ง (เหนือปุ่ม)
+        const rect = buttonElement.getBoundingClientRect();
+        const left = rect.left + (rect.width / 2); // กึ่งกลางปุ่ม
+        const top = rect.top - 10;                  // เหนือปุ่ม 10px
+
+        toast.style.left = left + 'px';
+        toast.style.top = top + 'px';
+        toast.style.transform = 'translateX(-50%)'; // จัดกึ่งกลาง (CSS)
+        
+        // 2.5 (สำคัญ!) ลบ "Copied!" ทิ้งหลังจาก Animation จบ
+        // (ใน CSS, animation 'sparkle-pop' ใช้เวลา 1s หรือ 1000ms)
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 1000); 
+    } catch (e) { /* ... */ }
+}
+สรุปส่วนที่ 2: ฟังก์ชันนี้จะ "ยิง" Confetti จากกึ่งกลางปุ่ม และ "สร้าง" Element <span> "Copied!" ให้ลอยขึ้นจากเหนือปุ่ม (โดยใช้ Animation จาก kahis-theme.css) จากนั้นตั้งเวลา 1 วินาทีเพื่อลบ <span> นั้นทิ้ง
+
+
+## BETA 3.3 VERSION (Edit UI OrderPE, Ext Doc, Layout button, Copy effect)
+(18 พฤศจิกายน 2025)
+
+### วัตถุประสงค์ (Objective)
+1.เพิ่ม effect การปุ่ม copy เมื่อกดตามที่วางแผนไว้
+2.ขอให้ footer ที่มี hypertext กับ ชื่อโปรแกรม เปลี่ยนตำแหน่ง เป็น ให้ชิดไปด้านซ้ายสำหรับ hypertext และให้ชื่อระบบกับ version อยู่กึ่งกลาง
+3.หน้า Order PE ขอปรับให้
+   3.1 Target ช่องทั้งสี่ ให้ด้านซ้ายบนคือ Date ตามเดิม และย้าย Time มาอยู่ซ้ายล่าง โดยฝากซ้ายนี้ให้ ปรับความกว้างของช่องให้น้อยกว่านี้เยอะๆ แสดง date และ time ได้เพียงพอก็พอ มีช่องไฟพอสวยงานห่างจากขอบ และ ฝังขวาเป็น DVM บน และ Department ล่าง ความกว้างก็เต็มหน้าไป
+   3.2 Select Orders ให้ลดความกว้างของปุ่ม vital sign และ eye exam ลง และขอให้แสดงข้อมูลในวงเล็บให้ครบทุกหัวข้อ) เรียงบนล่างตามเดิม แต่ว่า ให้จำลองปุ่ม Order Other A กับ Order Other B สีเทาๆ เหมือน inactive แต่ให้กดแล้วทำงานเหมือน vital และ eye
+4. Ext Doc ขอให้ข้อมูลในตาราง คอลัม IMG ที่มีเลขจำนวนรูป เป็นการเปิด function เช่นเดียวกับ การกดที่ date time ครับ ส่วน PDF ไม่ต้องเปลี่ยนแปลงทำเป็นเหมือนกดได้แต่เป็น # เหมือนเดิมครับ (ทั้ง by filter และ by date)
+5. ปุ่ม Confirm Create Ext. Document ย้ายมากึ่งกลาง และเพิ่มปุ่มสีเทาว่า ยกเลิกไว้คู่กัน ซ้าย ยกเลิก ขวา Confirm
+
+### แผนการทำงาน - 9 ขั้นตอน
+
+#### ส่วนที่ 1: (HTML) อัปเกรดโมดูล Ext Doc (คำขอข้อ 4 และ 5)
+
+1.  **ขั้นตอนที่ 1/9: (ไฟล์: `extdoc_page_addnew.html`)**
+    * **เป้าหมาย (ข้อ 5):** ย้ายปุ่ม "Confirm Create Ext. Document" ไปกึ่งกลาง และเพิ่มปุ่ม "ยกเลิก"
+    * **เทคนิค:** แก้ไขโค้ด HTML ใน div สุดท้ายของไฟล์ `extdoc_page_addnew.html` จาก `justify-between` เป็น `justify-center` และเพิ่มปุ่มสีเทา (`bg-gray-200`) "ยกเลิก" ทางด้านซ้ายของปุ่ม "Confirm"
+
+2.  **ขั้นตอนที่ 2/9: (ไฟล์: `extdoc-logic.js`)**
+    * **เป้าหมาย (ข้อ 4):** ทำให้คอลัมน์ "IMG" (ที่มีตัวเลข) ในตาราง Ext Doc สามารถคลิกเพื่อเปิด Album Lightbox ได้
+    * **เทคนิค:** แก้ไขฟังก์ชัน `renderTable` (ใน `extdoc-logic.js`) เราจะเปลี่ยน `<td>` ของคอลัมน์ IMG ให้เป็น `<a>` ที่มี `class="open-album-link"` (เหมือนกับคอลัมน์ Date/Time) และใส่ `data-gallery` ส่วนคอลัมน์ PDF จะคง `href="#"` ไว้ตามเดิม
+
+3.  **ขั้นตอนที่ 3/9: (ไฟล์: `extdoc-init.js`)**
+    * **เป้าหมาย (ข้อ 4):** ตรวจสอบว่า Event Listener รองรับการคลิกที่คอลัมน์ IMG
+    * **เทคนิค:** (ตรวจสอบ) Logic `extDocTbody.addEventListener('click', ...)` (ใน `extdoc-init.js`) ที่เราเขียนไว้ ถูกต้องอยู่แล้ว (เพราะมันมองหา `e.target.closest('a.open-album-link')`) ดังนั้นขั้นตอนนี้จึงเป็นการยืนยันว่า Logic ที่เราทำในขั้นตอนที่ 2/9 จะทำงานได้ทันที
+
+#### ส่วนที่ 2: (HTML/JS) อัปเกรดหน้า Order PE (คำขอข้อ 3)
+
+4.  **ขั้นตอนที่ 4/9: (ไฟล์: `order_pe_content.html`)**
+    * **เป้าหมาย (ข้อ 3.1):** จัด Layout ของ "Target" ใหม่ (Date/Time ซ้าย, DVM/Dept ขวา)
+    * **เทคนิค:** เปลี่ยน `grid-cols-1 md:grid-cols-2` (ใน section "Target") ให้เป็น `grid-cols-3` (คอลัมน์ซ้าย `col-span-1`, คอลัมน์ขวา `col-span-2`) และปรับความกว้างของช่อง Date/Time ให้น้อยลง
+    * **เป้าหมาย (ข้อ 3.2):** ลดความกว้างปุ่ม, เพิ่มข้อความในวงเล็บ, และเพิ่ม 2 ปุ่มสีเทา
+    * **เทคนิค:** แก้ไข `grid-cols-1 md:grid-cols-2` (ใน section "Select Orders") ให้เป็น `grid-cols-3` (เหมือนกัน)
+        * (ปุ่ม Vital Signs): เพิ่มข้อความในวงเล็บ (เช่น "...(Temp, HR, RR, BP, Pulse, CRT, FBS, Note)")
+        * (ปุ่ม Eye Exam): เพิ่มข้อความในวงเล็บ (เช่น "...(PLR, Palpebral, Dazzle, Menace, STT, Fluorescein, IOP, Note)")
+        * (ปุ่มใหม่): เพิ่ม `<button>` ใหม่ 2 ปุ่ม (Order Other A, Order Other B) โดยใช้สีเทา (`bg-gray-400`) และเพิ่ม id (เช่น `btn-order-pe-other-a`)
+
+5.  **ขั้นตอนที่ 5/9: (ไฟล์: `order-pe-init.js`)**
+    * **เป้าหมาย (ข้อ 3.2):** ทำให้ 2 ปุ่มสีเทาใหม่ทำงานได้
+    * **เทคนิค:** เพิ่ม Event Listener ให้กับ 2 ID ใหม่ (`#btn-order-pe-other-a`, `#btn-order-pe-other-b`) ให้เรียกฟังก์ชัน `openOrderNoteModal()` (เหมือนที่ปุ่ม Vital Signs และ Eye Exam ทำ)
+
+#### ส่วนที่ 3: (HTML) อัปเกรด Footer (คำขอข้อ 2)
+
+6.  **ขั้นตอนที่ 6/9: (ไฟล์: `index.html`)**
+    * **เป้าหมาย (ข้อ 2):** จัดตำแหน่งข้อความใน Footer (สีดำ/น้ำตาล) ใหม่
+    * **เทคนิค:** ค้นหา `<div class="bg-gray-800 ...">` (ประมาณบรรทัดที่ 359)
+        * เปลี่ยน div (container) ภายในจาก `flex justify-between` ให้เป็น `grid grid-cols-3`
+        * คอลัมน์ 1: ใส่ Hyperlinks (จัดชิดซ้าย)
+        * คอลัมน์ 2: ใส่ "ระบบเวชระเบียน... Version X.X.X.X" (จัดกึ่งกลาง)
+        * คอลัมน์ 3: (เว้นว่างไว้ หรือจัดชิดขวา ถ้าจำเป็น)
+
+#### ส่วนที่ 4: (JS/CSS) อัปเกรด Effect ปุ่ม Copy (คำขอข้อ 1)
+
+7.  **ขั้นตอนที่ 7/9: (ไฟล์: `kahis-theme.css`)**
+    * **เป้าหมาย (ข้อ 1):** เพิ่ม CSS สำหรับ Animation "Copied! ✨" (Sparkle effect)
+    * **เทคนิค:** เพิ่ม CSS Class ใหม่ (เช่น `.copied-sparkle-effect`) ที่ใช้ `animation`, `@keyframes`, `transform`, และ `opacity` เพื่อสร้างเอฟเฟกต์ "เด้งขึ้นและจางหาย" (คล้ายใน lucide.dev)
+
+8.  **ขั้นตอนที่ 8/9: (ไฟล์: `app-helpers.js`)**
+    * **เป้าหมาย (ข้อ 1):** "รื้อ" Logic การ Copy
+    * **เทคนิค:** แก้ไขฟังก์ชัน `showCopyMessage` ใหม่
+        * **Logic ใหม่:** ฟังก์ชันนี้จะรับ `buttonElement` เข้ามา, `document.createElement('span')` (สร้าง "Copied!" ขึ้นมาใหม่), เพิ่ม Class `.copied-sparkle-effect` (จากขั้นตอนที่ 7/9), คำนวณตำแหน่ง (Position) ให้อยู่ข้างๆ ปุ่ม, และใช้ `setTimeout` เพื่อลบ span นั้นทิ้งเมื่อ Animation จบ
+
+9.  **ขั้นตอนที่ 9/9: (ไฟล์: `app-logic.js`)**
+    * **เป้าหมาย (ข้อ 1):** เชื่อมต่อ Logic ใหม่
+    * **เทคนิค:** แก้ไข Event Listener ของปุ่ม Copy (ใน `initializeAssessmentScripts`)
+        * **Logic ใหม่:** เปลี่ยนจากการเรียก `showCopyMessage(assessmentMsg)` เป็น `showCopyMessage(copyAssessmentBtn)` (ส่ง "ตัวปุ่ม" เข้าไปในฟังก์ชันแทน)
+
 ## BETA 3.2 VERSION (Floating UI Refactor)
 (18 พฤศจิกายน 2025)
 
@@ -151,4 +344,5 @@
 * **Dark Mode / Theme:** มีระบบสลับ Theme (Light/Dark) ซึ่งถูกกำหนดค่าสีไว้ใน `kahis-theme.css` (โดย Dark Mode เป็นธีมสีเบจ/น้ำตาล)
 * **Modals (Pop-ups) ที่ซับซ้อน:** (Vital Signs, Eye Exam, Problem List) ที่มี Logic การทำงานภายในตัวเอง
 * **Dynamic History Tables:** ตารางประวัติ (ใน Assessment, Vital Signs, Eye Exam) ถูกสร้างขึ้นด้วย JavaScript และมีระบบ Sort ข้อมูล
+
 * **Client-Side Data:** ข้อมูลประวัติทั้งหมด (`vsHistoryData`, `eyeExamHistoryData`, `categoryData`) ถูกเก็บไว้ในตัวแปร JavaScript (Hardcoded)
