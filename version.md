@@ -1,6 +1,52 @@
 # KAHIS EMR PROTOTYPE - VERSION.MD
 (เรียงลำดับจากใหม่ล่าสุดไปเก่าสุด)
 
+## BETA 5.0-5.1 VERSION (Full Order Lab & Pathology System / Standard Data Integration)
+(19 พฤศจิกายน 2025)
+
+### วัตถุประสงค์ (Objective)
+ยกระดับระบบสั่งตรวจทางห้องปฏิบัติการ (Order Lab) และพยาธิวิทยา (Order Pathology) ให้มีความสมบูรณ์ระดับ Production-Ready ทั้งในด้านข้อมูล (Data Standard) และประสบการณ์ใช้งาน (UX/UI) โดยอิงมาตรฐานสากล (HL7, LOINC, AAHA) และรองรับการใช้งานบน Tablet อย่างเต็มรูปแบบ
+
+### สิ่งที่อัพเดท (Core Concepts)
+1.  **Standardized Data Model:** เปลี่ยนข้อมูลรายการตรวจทั้งหมดเป็นของจริง อ้างอิงรหัสมาตรฐานโลก (LOINC for Tests, SNOMED for Specimens, HL7 Table 0074 for Categories) พร้อมระบุชนิดหลอดเก็บตัวอย่าง (Container) ตามมาตรฐาน ISO 15189
+2.  **Hybrid Scroll Layout:** ปรับโครงสร้างหน้าจอเป็นแบบ "Fixed Frame" (Header/Footer ติดตาย) ส่วนเนื้อหาตรงกลางเลื่อนได้อิสระ (Scrollable Workspace) แก้ปัญหาหน้าจอยืดหดไม่สวยงามบน Tablet
+3.  **High Contrast UI:** ปรับปรุงการแสดงผลป้ายกำกับ (Tags) และปุ่มสถานะ (Priority) ให้ชัดเจน อ่านง่ายในทุกสภาพแสง (Light/Dark Mode) โดยเฉพาะ Dark Mode ที่จูนสีให้เข้ากับธีม Earth Tone
+4.  **Advanced Order Logic:** เพิ่มระบบจัดการสถานะความเร่งด่วน (Routine/STAT), สถานะงดอาหาร (Fasting), และ Logic การกรอกประวัติ Patho ที่ฉลาดขึ้น (จำประวัติเดิม ล้างแค่ตำแหน่ง)
+
+### รายละเอียดการอัพเดท (Implementation Details)
+
+#### ส่วนที่ 1: (Data) ฐานข้อมูลมาตรฐานสากล
+1.  **`app-data.js` (Reworked):**
+    * ยกเครื่อง `labServiceCatalog` และ `pathologyServiceCatalog` ใหม่ทั้งหมด
+    * เพิ่มรายการตรวจละเอียดครบถ้วน: Hematology, Chemistry (Profiles), Immunology (Rapid Test), Urinalysis, Hormones, Drug Levels, PCR
+    * เพิ่ม Field มาตรฐาน: `loinc` (รหัสทดสอบ), `snomed` (รหัสสิ่งส่งตรวจ), `container` (ชนิดหลอด/ภาชนะ)
+
+#### ส่วนที่ 2: (UI/UX) หน้าจอสั่งตรวจ
+2.  **`order_lis_content.html` (Clinical Lab):**
+    * จัด Layout 3 คอลัมน์ (Category -> Item -> Cart) ความสูงคงที่ 650px
+    * เพิ่มส่วนเลือก **Priority (Routine/STAT)** และ **Fasting Status** ที่ Footer
+    * ปรับสี Header และ Theme ให้เป็นสีชมพู (Pink) ตามมาตรฐาน
+3.  **`order_path_content.html` (Anatomic Path):**
+    * จัด Layout 3 คอลัมน์ โดยคอลัมน์ขวาสุดเปลี่ยนเป็น **Form (Specimen & History)**
+    * เพิ่ม Label บังคับกรอกตามมาตรฐาน AAHA (Site, Clinical History)
+    * ปรับสี Header และ Theme ให้เป็นสีม่วง (Fuchsia) เพื่อแยกแยะจาก Lab
+
+#### ส่วนที่ 3: (Logic) ระบบการทำงาน
+4.  **`app-init.js` (Refactored):**
+    * **Priority Logic:** เขียน Logic ควบคุมปุ่ม Routine/STAT ให้ทำงานถูกต้อง (Active State เปลี่ยนสีพื้นเทาเข้ม ตัวแดงสำหรับ STAT)
+    * **Pathology Logic:** พัฒนาระบบ "Add to Request" ให้ล้างช่อง Site (ตำแหน่ง) แต่ **จำค่า History (ประวัติ)** ไว้เพื่อความสะดวกในการส่งหลายชิ้นเนื้อ
+    * **Success Modal:** อัปเกรดหน้าต่างยืนยันผล:
+        * แสดงสรุปยอดเงิน, จำนวนรายการ
+        * แสดงสถานะ Priority และ Fasting
+        * เพิ่มหมายเหตุ (Note) อธิบายความแตกต่างระหว่าง Accession No. และ Order No.
+    * **Theme Matching:** แก้ไขป้าย Tag (Container Badge) ให้รองรับ Dark Mode แบบ Earth Tone (พื้นโปร่ง ตัวหนังสือ/ขอบสีน้ำตาลเข้ม) และ Light Mode แบบ High Contrast (พื้นขาว ขอบเทา)
+
+#### ส่วนที่ 4: (Layout) โครงสร้างหลัก
+5.  **`index.html` (Tweaked):**
+    * ปรับปรุงส่วน `<main>` ให้รองรับ `overflow: hidden` เพื่อทำ Hybrid Scroll
+    * ปรับปรุงส่วนแสดงผลสิทธิ์การรักษา (Pet Info) เป็นป้ายกำกับแทน Checkbox
+    * จัดระเบียบ Tab Menu และ Footer ใหม่
+
 ## BETA 4.0 VERSION (LIS & Path Module Integration / Modal Architecture Refactor)
 (18 พฤศจิกายน 2025)
 
@@ -389,3 +435,4 @@ function showSparkleCopyEffect(buttonElement) {
 
 
 * **Client-Side Data:** ข้อมูลประวัติทั้งหมด (`vsHistoryData`, `eyeExamHistoryData`, `categoryData`) ถูกเก็บไว้ในตัวแปร JavaScript (Hardcoded)
+
