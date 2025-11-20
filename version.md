@@ -1,6 +1,27 @@
 # KAHIS EMR PROTOTYPE - VERSION.MD
 (เรียงลำดับจากใหม่ล่าสุดไปเก่าสุด)
 
+## BETA 5.1.2 VERSION (Order Lab UI/UX Polish - Radio Buttons & Blue Theme)
+(20 พฤศจิกายน 2025)
+
+### วัตถุประสงค์ (Objective)
+แก้ไขปัญหา UX และ Bug ในหน้า Order Lab (LIS) โดยเปลี่ยนการเลือก Priority จากปุ่มกด (Button Toggle) เป็น Radio Button เพื่อความเสถียรในการใช้งาน และปรับปรุงธีมสี (Visual Consistency) ของหน้าจอให้เป็นสีน้ำเงิน (Blue Theme) ทั้งหมดอย่างถูกต้อง
+
+### สิ่งที่อัพเดท (Updates)
+1.  **Radio Button Transformation:** เปลี่ยนระบบเลือก Priority (Routine/STAT) เป็น **Radio Button** เพื่อแก้ปัญหาค่าสถานะหลุดเมื่อมีการโต้ตอบกับส่วนอื่นของฟอร์ม และเพื่อให้ผู้ใช้งานแยกแยะสถานะที่ถูกเลือกได้ชัดเจนยิ่งขึ้น
+2.  **Theme Color Fix:** แก้ไขโค้ด Checkbox "Patient Fasted" จากสีชมพู (`text-pink-600`) เป็น **สีน้ำเงิน (`text-blue-600`)** เพื่อให้ตรงกับการแสดงผลจริงและเข้าชุดกับ Radio Button ใหม่
+3.  **Code Refactor:** ลบ Logic JavaScript ที่ซับซ้อนในการจัดการสีปุ่มออก และเปลี่ยนมาใช้การอ่านค่าจาก Native Input State แทน ทำให้โค้ดสั้นลงและทำงานแม่นยำขึ้น
+4.  **Visual Polish:** ปรับแต่ง UI ของส่วน Priority ให้ Routine เป็นสีน้ำเงิน (Default) และ STAT เป็นสีน้ำเงินแต่เน้นตัวหนังสือ **สีแดง** เพื่อความเด่นชัด
+
+### รายละเอียดทางเทคนิค (Implementation Details)
+1.  **`order_lis_content.html`:**
+    * แทนที่ปุ่ม Priority เดิมด้วย `<input type="radio">`
+    * แก้ไข Class ของ Checkbox Fasting ให้ถูกต้องตาม Theme
+2.  **`app-init.js`:**
+    * เขียน Logic ใหม่ใน `initializeLisScripts` โดยตัดฟังก์ชัน `updatePriorityUI` เดิมทิ้ง
+    * เปลี่ยนการอ่านค่า Priority เป็น `document.querySelector('input[name="lis_priority"]:checked')`
+    * เพิ่ม Logic การ Reset ค่ากลับเป็น Routine หลังจากกด Save
+
 ## BETA 5.1.2 VERSION (Fix Priority Logic & UI / Save State in Order Lab)
 (20 พฤศจิกายน 2025)
 
