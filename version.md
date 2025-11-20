@@ -1,6 +1,26 @@
 # KAHIS EMR PROTOTYPE - VERSION.MD
 (เรียงลำดับจากใหม่ล่าสุดไปเก่าสุด)
 
+## BETA 5.1.2 VERSION (Fix Priority Logic & UI / Save State in Order Lab)
+(20 พฤศจิกายน 2025)
+
+### วัตถุประสงค์ (Objective)
+แก้ไข Bug สำคัญในหน้า Order Lab (LIS) ที่ทำให้สถานะ Priority (Routine/STAT) ถูกรีเซ็ตเมื่อมีการโต้ตอบกับ element อื่น และแก้ไขปัญหาค่า Priority ไม่ถูกส่งไปยังหน้ายืนยัน (Success Modal) พร้อมทั้งปรับปรุงสีปุ่มให้สื่อความหมายชัดเจนขึ้น
+
+### สิ่งที่อัพเดท (Updates)
+1.  **Fixed Priority State Bug:** แก้ไขปัญหาที่ปุ่ม Priority คืนค่า Default เมื่อกด Checkbox Fasting หรือปุ่มอื่นๆ
+2.  **Correct Data Submission:** แก้ไข Logic ปุ่ม Save ให้ส่งค่า Priority (Routine/STAT) และ Fasting Status ล่าสุดไปยัง Success Modal ได้ถูกต้องแม่นยำ
+3.  **UI Refinement:** ปรับสีปุ่ม Priority ตาม Requirement:
+    * **Active State:** พื้นหลังสีเทาเข้ม (Dark Grey) ทั้งคู่ เพื่อให้รู้ว่าถูกเลือก
+    * **STAT Text:** เมื่อเลือก STAT ตัวหนังสือจะเป็น **สีแดง** และมีขอบแดง เพื่อเน้นความเร่งด่วน
+4.  **Prevent Form Submission:** เพิ่ม `type="button"` และ `e.preventDefault()` เพื่อป้องกันหน้าเว็บ Refresh ตัวเองโดยไม่ตั้งใจ
+
+### รายละเอียดทางเทคนิค (Implementation Details)
+1.  **`order_lis_content.html`:** เพิ่ม `id` (`btn-prio-routine`, `btn-prio-stat`) และ `type="button"`
+2.  **`app-init.js`:**
+    * เขียนฟังก์ชัน `updatePriorityUI` ใหม่
+    * แก้ไข Event Listener ของปุ่ม Save ให้ดึงค่าจาก Global Variable `globalLisPriority` แทนการอ่านจาก DOM โดยตรง
+
 ## BETA 5.0-5.1 VERSION (Full Order Lab & Pathology System / Standard Data Integration)
 (19 พฤศจิกายน 2025)
 
@@ -435,4 +455,5 @@ function showSparkleCopyEffect(buttonElement) {
 
 
 * **Client-Side Data:** ข้อมูลประวัติทั้งหมด (`vsHistoryData`, `eyeExamHistoryData`, `categoryData`) ถูกเก็บไว้ในตัวแปร JavaScript (Hardcoded)
+
 
