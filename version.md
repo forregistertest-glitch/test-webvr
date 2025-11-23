@@ -1,6 +1,32 @@
 # KAHIS EMR PROTOTYPE - VERSION.MD
 (เรียงลำดับจากใหม่ล่าสุดไปเก่าสุด)
 
+## BETA 5.7 VERSION (LAB Dashboard Isolation & Refactor)
+(23 พฤศจิกายน 2025)
+
+### วัตถุประสงค์ (Objective)
+ปรับปรุงหน้า LAB Dashboard แยกจากระบบหลัก (Standalone Module) ให้สมบูรณ์ตามความต้องการล่าสุด ทั้งด้าน Layout, Pagination และ Functional Filter
+
+### สิ่งที่อัพเดท (Updates)
+1.  **Enhanced Header Layout:**
+    * ย้ายกลุ่ม Date Control (Title, Go to Today, Date Picker) ไปอยู่ **ด้านขวา** ของบรรทัดแรก เพื่อความสมดุล
+    * เปลี่ยนสถานะข้อความ "Today" เป็น "Current Today" (สีจาง/Inactive) เพื่อลดความสับสน
+2.  **Advanced Filters:**
+    * เปลี่ยน Type Toggle จาก 2 ปุ่มเป็น **3 ปุ่ม (All / Clinical Lab / Pathology)** โดยตั้งค่า Default เป็น **All**
+    * เขียน Logic ใหม่ให้ปุ่มกรองข้อมูลในตารางได้จริงตามประเภทงาน
+3.  **Pagination Upgrade:**
+    * ปรับจำนวนรายการต่อหน้าเป็น **50 รายการ** (Showing 1-50 of 462)
+    * ปรับสีข้อความ Pagination ให้เป็นสีเทาปกติ (นำตัวหนาออก) เพื่อความสบายตา
+
+### รายละเอียดทางเทคนิค (Implementation Details)
+1.  **`lab_dashboard_content.html`:**
+    * Re-structure HTML ส่วน Header ใหม่ (ย้าย Div Date Controls)
+    * เพิ่มปุ่ม Toggle Type ชุดใหม่ (3 ปุ่ม)
+2.  **`lab-dashboard-init.js`:**
+    * อัปเดตตัวแปร `itemsPerPage = 50`
+    * เพิ่มตัวแปร State `currentTypeFilter` และ Logic การกรองข้อมูล 2 ชั้น (Status + Type)
+    * ปรับแก้การ Render HTML ของ Pagination Info ให้เรียบง่าย
+
 ## BETA 5.6 VERSION (Order Plan System & Data Structure Refactor)
 (23 พฤศจิกายน 2025)
 

@@ -130,7 +130,7 @@ async function loadModuleContent(contentFile) {
         return; 
     }
 
-    // --- Block 2: Initializing Scripts for the Content ---
+// --- Block 2: Initializing Scripts for the Content ---
     try {
         if (contentFile === 'assessment_content.html') {
             initializeAssessmentScripts(); 
@@ -140,15 +140,19 @@ async function loadModuleContent(contentFile) {
             initializeExtDocAddNewPage();
         } else if (contentFile === 'order_pe_content.html') {
             initializeOrderPEScripts();
-        }
-        else if (contentFile === 'order_lis_content.html') {
+        } else if (contentFile === 'order_lis_content.html') {
             initializeLisScripts(); 
         } else if (contentFile === 'order_path_content.html') {
             initializePathologyScripts(); 
         } else if (contentFile === 'lab_viewer_content.html') {
-        // [NEW] Trigger Lab Viewer Logic
-        if (typeof initializeLabViewer === 'function') {
-            initializeLabViewer();
+            if (typeof initializeLabViewer === 'function') initializeLabViewer();
+        } else if (contentFile === 'lab_dashboard_content.html') { 
+            // [CORRECTED] Check for Dashboard Init
+            if (typeof initializeLabDashboard === 'function') {
+                console.log("Calling initializeLabDashboard()..."); // Debug Log
+                initializeLabDashboard();
+            } else {
+                console.error("initializeLabDashboard function NOT FOUND");
             }
         }
         

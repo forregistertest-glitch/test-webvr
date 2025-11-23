@@ -194,7 +194,11 @@
                     </div>
                 </div>
 
-                <a href="#" class="px-3 py-2 text-gray-700 dark:text-[--color-text-base] hover:bg-gray-100 dark:hover:bg-[--color-bg-secondary] rounded">List of order</a>
+                <!-- CHANGED: Link to new LAB Dashboard -->
+                <a href="#" class="emr-tab px-3 py-2 text-indigo-600 dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-[--color-bg-secondary] rounded font-bold flex items-center" data-target="lab_dashboard_content.html">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 mr-1.5"></i>
+                    LAB Dashboard
+                </a>
 
                 <div class="relative group" x-data="{ open: false }">
                     <button @click="open = !open" @keydown.escape.window="open = false" class="flex items-center px-3 py-2 text-blue-600 dark:text-[--color-primary-500] hover:bg-gray-100 dark:hover:bg-[--color-bg-secondary] rounded">
@@ -1327,6 +1331,9 @@
     <script src="extdoc-init.js"></script>
     <script src="extdoc-addnew-init.js"></script>
     <script src="order-pe-init.js"></script>
+    <!-- NEW: LAB Dashboard Scripts (Mockup) -->
+    <script src="lab-dashboard-data.js"></script>
+    <script src="lab-dashboard-init.js"></script>
 
     <div class="fixed bottom-4 right-4 z-50 flex items-center space-x-3">
 
