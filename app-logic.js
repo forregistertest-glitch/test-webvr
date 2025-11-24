@@ -1,6 +1,60 @@
-// This is app-logic.js (BETA 4.0 - Final Step 10 - Eye Exam Table Logic Update)
+// This is app-logic.js (BETA 6.1 - Renamed LIS to Lab & Rewired)
 
-// This is app-logic.js (Final Update for Eye Exam Table Layout)
+// =================================================================
+// 1. DATA REWIRE ENGINE (BETA 6.1)
+// Aggregates decoupled data streams into legacy global variables
+// so that existing charts, tables, and logic continue to work seamlessly.
+// =================================================================
+
+(function() {
+    console.log(" [System] Starting Data Rewire (Beta 6.1)...");
+
+    // A. Gather Data from Decoupled Modules (Safe Fallback to empty array)
+    // Note: We accept both 'lis' (legacy) and 'lab' (new) variable names if they exist
+    const vitals = window.vitalHistoryData || [];
+    const eyes = window.eyeHistoryData || [];
+    const labs = window.lisHistoryData || window.labHistoryData || []; // Support both names
+    const patho = window.pathoHistoryData || [];
+    
+    // B. Helper: Date Parser for Sorting
+    const parseSortDate = (item) => {
+        if (item.raw_datetime) return new Date(item.raw_datetime);
+        // Fallback for string formats "30 Dec 2025, 10:00" or "2025-12-30 10:00"
+        const dateStr = (item.effective_time || item.collected_time || item.order_create_date || "").replace(',', '');
+        return new Date(dateStr);
+    };
+
+    // C. Merge All Streams into 'activityLogData' (The Central Backbone)
+    const aggregatedLogs = [...vitals, ...eyes, ...labs, ...patho];
+
+    // D. Sort by Date Descending (Newest First)
+    aggregatedLogs.sort((a, b) => parseSortDate(b) - parseSortDate(a));
+
+    // E. Expose as Global Variable (Restoring the connection)
+    window.activityLogData = aggregatedLogs;
+    
+    // F. Polyfill for Lab Dashboard (Optional: if Dashboard expects standalone data)
+    // Filter only Lab/Path from the main log to recreate labDashboardData
+    window.labDashboardData = aggregatedLogs.filter(item => 
+        item.activity_type === 'LIS' || item.activity_type === 'Lab' || item.activity_type === 'Pathology'
+    ).map(item => ({
+        ...item,
+        type: (item.activity_type === 'LIS' || item.activity_type === 'Lab') ? 'LIS' : 'Pathology' // Normalize type for dashboard filter
+    }));
+
+    // G. Map Patient Queue (If patient-data.js exists)
+    if (window.patientQueueData) {
+        window.mockPatients = window.patientQueueData;
+    }
+
+    console.log(` [System] Rewire Complete: ${aggregatedLogs.length} items aggregated.`);
+    console.log(` [System] Lab Dashboard Data: ${window.labDashboardData.length} items prepared.`);
+
+})();
+
+// =================================================================
+// 2. APP LOGIC FUNCTIONS (Module Loading, Rendering, Tabs)
+// =================================================================
 
 function renderEyeExamHistoryTable(data) {
     const tableBody = document.getElementById('eyeHistoryTableBody');
@@ -29,23 +83,6 @@ function renderEyeExamHistoryTable(data) {
         else if (item.order_status === 'Pending') statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-200">Plan</span>`;
         else statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200">Cancel</span>`;
 
-        // Note handling (item.parameters.Note is mapped to item.note in app-init usually, but here check mapping)
-        // In app-init.js showEye() mapping: imageUrl uses parameters.Note. 
-        // Let's assume Note is passed directly or inside parameters.
-        // Based on Step 1 app-data.js generator: Note is in parameters.
-        // Based on Step 3.2 app-init.js mapping: we need to ensure 'note' and 'order_note' are available.
-        // app-init.js showEye() mapped: ... parameters: getEyeData() ... 
-        // Wait, app-init.js showEye() maps data for THIS function. Let's check that mapping.
-        // It maps: ... imageUrl: (entry.parameters.Note)...
-        // I will use item.order_note (from entry) and item.note (from parameters.Note)
-        
-        // Correction: In app-init.js showEye(), we didn't explicitly map 'order_note' or 'note' text to a property named 'note' for display, 
-        // we mostly used it for Image logic. I will assume the data passed here has access to it.
-        // Let's use optional chaining on the object passed.
-        // Actually, let's update the mapping in app-init.js briefly to be sure.
-        
-        // (Self-correction: To be safe, I will use item.note (from parameters) and item.order_note)
-        
         row.innerHTML = `
             <td class="p-3 sticky left-0 bg-white dark:bg-[var(--color-bg-content)] text-[var(--color-text-base)] shadow-sm border-r border-gray-100 dark:border-[var(--color-border-base)] whitespace-nowrap">
                 ${item.datetime}
@@ -91,10 +128,8 @@ function renderEyeExamHistoryTable(data) {
         lucide.createIcons();
     }
 }
-// ***** END: EYE EXAM HISTORY FUNCTIONS (MODIFIED) *****
 
-
-// +++ START: EMR Tab Switching Logic +++
+// --- Module Loading Logic ---
 
 async function loadModuleContent(contentFile) {
     const contentPlaceholder = document.getElementById('emr-content-placeholder');
@@ -130,7 +165,7 @@ async function loadModuleContent(contentFile) {
         return; 
     }
 
-// --- Block 2: Initializing Scripts for the Content ---
+    // --- Block 2: Initializing Scripts for the Content ---
     try {
         if (contentFile === 'assessment_content.html') {
             initializeAssessmentScripts(); 
@@ -139,22 +174,20 @@ async function loadModuleContent(contentFile) {
         } else if (contentFile === 'extdoc_page_addnew.html') {
             initializeExtDocAddNewPage();
         } else if (contentFile === 'sys_exam_content.html') {
-            // เรียกฟังก์ชัน Init ของ Sys Exam (จาก sys-exam-init.js)
             if (typeof initializeSysExam === 'function') initializeSysExam();
         } else if (contentFile === 'order_pe_content.html') {
             initializeOrderPEScripts();
         } else if (contentFile === 'order_tx_content.html') {
             if (typeof initializeOrderTxScripts === 'function') initializeOrderTxScripts();
         } else if (contentFile === 'order_lis_content.html') {
-            initializeLisScripts(); 
+            // Changed function name from initializeLisScripts to initializeLabScripts
+            initializeLabScripts(); 
         } else if (contentFile === 'order_path_content.html') {
             initializePathologyScripts(); 
         } else if (contentFile === 'lab_viewer_content.html') {
             if (typeof initializeLabViewer === 'function') initializeLabViewer();
         } else if (contentFile === 'lab_dashboard_content.html') { 
-            // [CORRECTED] Check for Dashboard Init
             if (typeof initializeLabDashboard === 'function') {
-                console.log("Calling initializeLabDashboard()..."); // Debug Log
                 initializeLabDashboard();
             } else {
                 console.error("initializeLabDashboard function NOT FOUND");
@@ -191,12 +224,11 @@ function initializeTabSwitching() {
         });
     });
 }
-// +++ END: EMR Tab Switching Logic +++
 
 // +++ START: Assessment-related Functions +++
 function initializeAssessmentScripts() {
     
-    // --- Problem List Modal (Dynamic Content) ---
+    // --- Problem List Modal ---
     const openProblemListBtn = document.getElementById('open-problem-list-modal');
     const problemListModal = document.getElementById('problem-list-modal'); 
     const closeProblemListBtnX = document.getElementById('problem-list-popup-close-x'); 
@@ -222,7 +254,7 @@ function initializeAssessmentScripts() {
         problemListModal.dataset.listenerAttached = 'true';
     }
 
-    // --- Copy to Clipboard (Dynamic Content) ---
+    // --- Copy to Clipboard ---
     const copyAssessmentBtn = document.getElementById('copy-assessment-note-btn');
     const assessmentContent = document.getElementById('assessment-note-content');
     const copyProblemBtn = document.getElementById('copy-problem-list-btn');
@@ -233,29 +265,23 @@ function initializeAssessmentScripts() {
     if (copyAssessmentBtn && assessmentContent) {
         copyAssessmentBtn.addEventListener('click', () => {
             const textToCopy = assessmentContent.innerText || assessmentContent.textContent;
-            if (copyToClipboard(textToCopy)) {
-                showSparkleCopyEffect(copyAssessmentBtn);
-            }
+            if (copyToClipboard(textToCopy)) showSparkleCopyEffect(copyAssessmentBtn);
         });
     }
     if (copyProblemBtn && problemContent) {
         copyProblemBtn.addEventListener('click', () => {
             const textToCopy = problemContent.innerText || problemContent.textContent;
-            if (copyToClipboard(textToCopy)) {
-                showSparkleCopyEffect(copyProblemBtn);
-            }
+            if (copyToClipboard(textToCopy)) showSparkleCopyEffect(copyProblemBtn);
         });
     }
     if (copyDiagnosisBtn && diagnosisContent) {
         copyDiagnosisBtn.addEventListener('click', () => {
             const textToCopy = diagnosisContent.innerText || diagnosisContent.textContent;
-            if (copyToClipboard(textToCopy)) {
-                showSparkleCopyEffect(copyDiagnosisBtn);
-            }
+            if (copyToClipboard(textToCopy)) showSparkleCopyEffect(copyDiagnosisBtn);
         });
     }
 
-    // --- Assessment History Table Sort (Dynamic Content) ---
+    // --- Assessment History Table Sort ---
     const assessmentHistoryTableBody = document.getElementById('assessment-history-table-body');
     const assessmentHistoryHeaders = document.querySelectorAll('#assessment-history-table th[data-sort]');
     
@@ -291,11 +317,9 @@ function initializeAssessmentScripts() {
                 valB = parseInt(b.department, 10);
             }
             let comparison = 0;
-            if (valA > valB) {
-                comparison = 1;
-            } else if (valA < valB) {
-                comparison = -1;
-            }
+            if (valA > valB) comparison = 1;
+            else if (valA < valB) comparison = -1;
+            
             if (comparison === 0 && column !== 'datetime') {
                  let dateA = a.datetime;
                  let dateB = b.datetime;
@@ -317,9 +341,7 @@ function initializeAssessmentScripts() {
         if (activeIcon) {
             activeIcon.setAttribute('data-lucide', assessmentCurrentSort.direction === 'asc' ? 'arrow-up' : 'arrow-down');
         }
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons(); 
-        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     if (assessmentHistoryHeaders.length > 0) {
@@ -337,6 +359,8 @@ function initializeAssessmentScripts() {
                 updateAssessmentSortUI(header);
             });
         });
+        
+        // Initial Render
         sortAssessmentData(assessmentCurrentSort.column, assessmentCurrentSort.direction); 
         renderAssessmentHistoryTable(assessmentHistoryData);
         assessmentHistoryHeaders.forEach(header => {
