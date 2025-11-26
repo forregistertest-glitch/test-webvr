@@ -180,6 +180,8 @@ async function loadModuleContent(contentFile) {
             initializeOrderPEScripts();
         } else if (contentFile === 'order_tx_content.html') {
             if (typeof initializeOrderTxScripts === 'function') initializeOrderTxScripts();
+        } else if (contentFile === 'order_rx_content.html') {
+            if (typeof initializeOrderRxScripts === 'function') initializeOrderRxScripts();
         } else if (contentFile === 'order_lis_content.html') {
             // *** FIX: เรียกชื่อฟังก์ชันให้ตรงกับใน app-init.js ***
             if (typeof initializeLabScripts === 'function') {
